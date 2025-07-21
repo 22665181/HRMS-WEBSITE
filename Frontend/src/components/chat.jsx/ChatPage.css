@@ -1,0 +1,272 @@
+/* Parent flex layout */
+.app-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar (20%) */
+.sidebar {
+    width: 20%;
+    background-color: #f4f4f4;
+    border-right: 1px solid #ddd;
+}
+
+/* Chat List (30%) */
+.chat-list {
+    width: 30%;
+    background-color: #fff;
+    border-right: 1px solid #ddd;
+}
+
+/* Chat Window (50%) */
+.chat-window {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-left: 1px solid #ddd;
+    height: 100vh; /* ✅ Full height */
+}
+
+/* Chat Header */
+.chat-header {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.user-status {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.user-note {
+    font-size: 0.75rem;
+    color: #aaa;
+    max-width: 300px;
+}
+
+.three-dots {
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: #999;
+}
+
+/* Chat Messages */
+.chat-body {
+    flex-grow: 1;
+    padding: 1rem 2rem;
+    overflow-y: auto;
+    background-color: #fafafa;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Message Styles */
+.message {
+    display: flex;
+    flex-direction: column;
+    max-width: 65%;
+}
+
+.message.sent {
+    align-self: flex-end;
+}
+
+.message.received {
+    align-self: flex-start;
+}
+
+.bubble {
+    padding: 12px 16px;
+    border-radius: 12px;
+    word-break: break-word;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.bubble.purple {
+    background-color: #5c4ce1;
+    color: white;
+}
+
+.bubble.gray {
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.reply-options {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    color: #fff;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.timestamp {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 4px;
+    text-align: left;
+}
+
+/* Input Footer */
+.chat-footer {
+    padding: 1rem;
+    border-top: 1px solid #eee;
+    background-color: white;
+}
+
+.send-button {
+    background-color: #5c4ce1 !important;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.chat-window-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding-top: 20vh;
+    padding-bottom: 10vh;
+}
+
+
+/* Remove padding from chat-window-inner now */
+.chat-window-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0;
+}
+.chat-body {
+    padding: 1rem 2rem;
+}
+
+/* ----------------------------------------
+RESPONSIVENESS (PHASE 1)
+---------------------------------------- */
+
+/* Tablet View */
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none;
+    }
+    .chat-list {
+        width: 40%;
+    }
+    .chat-window {
+        width: 60%;
+    }
+}
+
+/* Mobile View */
+@media (max-width: 768px) {
+    .sidebar,
+    .chat-list {
+        display: none;
+    }
+    .chat-window {
+        width: 100%;
+        height: 100vh;
+        margin: 0;
+    }
+}
+/* ----------------------------------------
+THREE DOTS DROPDOWN (PHASE 2)
+---------------------------------------- */
+/* ----------------------------------------
+FIXED FLOATING DROPDOWN (PHASE 2 FINAL)
+---------------------------------------- */
+.dots-wrapper {
+    position: relative;
+}
+
+.dropdown-float {
+    position: absolute;
+    top: 0;
+    right: 120%;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    border-radius: 6px;
+    z-index: 100;
+}
+
+.dropdown-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.dropdown-btn:hover {
+    background-color: #eaeaea;
+}
+/* ----------------------------------------
+RIGHT CLICK CONTEXT MENU (PHASE 5)
+---------------------------------------- */
+.context-menu {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    padding: 0.5rem 0;
+    margin: 0;
+    z-index: 2000;
+    width: 150px;
+    border-radius: 4px;
+}
+
+.context-menu li {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.context-menu li:hover {
+    background-color: #f5f5f5;
+}
+.timestamp {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 4px;
+    text-align: left;
+}
+
+.message.sent .timestamp {
+    text-align: right;
+}
