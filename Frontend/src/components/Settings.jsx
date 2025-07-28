@@ -86,7 +86,7 @@ function Settings() {
           </Col>
           <Col lg={4} className="text-center d-flex align-items-center">
             <div className="w-100">
-              <img src="src\assets\settings-side-img.png" alt="Illustration" className="img-fluid" style={{ maxWidth: '400px', opacity: 0.85 }} />
+              {/* <img src="src\assets\settings-side-img.png" alt="Illustration" className="img-fluid" style={{ maxWidth: '400px', opacity: 0.85 }} /> */}
             </div>
           </Col>
         </Row>
