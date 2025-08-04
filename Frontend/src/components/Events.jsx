@@ -222,19 +222,33 @@ function Event2({ onNavigate, eventData }) {
   const [conferenceDetails, setConferenceDetails] = useState("");
   const [duration, setDuration] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onNavigate('event3', {
-      name,
-      email,
-      eventTitle,
-      conferenceDetails,
-      duration,
-      date,
-      time,
-      timezone,
-    });
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const eventDataToSend = {
+    event_title: eventTitle,
+    name,
+    email,
+    duration,
+    date,
+    time,
+    timezone,
+    conference_details: conferenceDetails
   };
+
+  const response = await fetch('http://localhost:5000/api/events', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(eventDataToSend)
+  });
+
+  if (response.ok) {
+    onNavigate('event3', eventDataToSend);
+  } else {
+    alert('Failed to save event');
+  }
+};
+
 
   return (
     <div className="events-container" style={{ 
