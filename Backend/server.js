@@ -20,20 +20,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Routes
 app.use('/api/events', eventRoutes);
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    message: 'HRMS Backend Server is running',
-    timestamp: new Date().toISOString()
-  });
-});
-
 // 404 handler
 app.use('*', (req, res) => {
-  res.status(404).json({ 
-    success: false, 
-    message: 'Route not found' 
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
   });
 });
 
@@ -50,8 +41,7 @@ app.use((error, req, res, next) => {
 // Start server
 const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`📅 Events API: http://localhost:${PORT}/api/events`);
+  console.log(` Events API: http://localhost:${PORT}/api/events`);
 });
 
 // Handle unhandled promise rejections

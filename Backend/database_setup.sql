@@ -24,31 +24,31 @@ CREATE INDEX IF NOT EXISTS idx_events_date ON events(event_date);
 CREATE INDEX IF NOT EXISTS idx_events_organizer ON events(organizer_email);
 
 -- Insert some sample data (optional)
-INSERT INTO events (
-    title, description, event_date, event_time, timezone, location, 
-    event_type, max_participants, organizer_name, organizer_email
-) VALUES 
-(
-    'Team Standup Meeting', 
-    'Daily team standup to discuss progress and blockers',
-    '2025-08-05',
-    '09:00:00',
-    'Asia/Kolkata',
-    'Conference Room A',
-    'meeting',
-    10,
-    'John Doe',
-    'john.doe@company.com'
-),
-(
-    'Project Planning Session',
-    'Planning session for the new HRMS features',
-    '2025-08-06',
-    '14:00:00',
-    'Asia/Kolkata',
-    'Virtual - Zoom',
-    'planning',
-    25,
-    'Jane Smith',
-    'jane.smith@company.com'
-) ON CONFLICT DO NOTHING;
+-- INSERT INTO events (
+--     title, description, event_date, event_time, timezone, location, 
+--     event_type, max_participants, organizer_name, organizer_email
+-- ) VALUES 
+-- (
+--     'Team Standup Meeting', 
+--     'Daily team standup to discuss progress and blockers',
+--     '2025-08-05',
+--     '09:00:00',
+--     'Asia/Kolkata',
+--     'Conference Room A',
+--     'meeting',
+--     10,
+--     'John Doe',
+--     'john.doe@company.com'
+-- ),
+-- (
+--     'Project Planning Session',
+--     'Planning session for the new HRMS features',
+--     '2025-08-06',
+--     '14:00:00',
+--     'Asia/Kolkata',
+--     'Virtual - Zoom',
+--     'planning',
+--     25,
+--     'Jane Smith',
+--     'jane.smith@company.com'
+-- ) ON CONFLICT DO NOTHING;
