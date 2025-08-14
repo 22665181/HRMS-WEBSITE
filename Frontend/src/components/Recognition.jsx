@@ -24,6 +24,41 @@ const RecognitionForm = () => {
       [name]: type === 'checkbox' ? checked : type === 'file' ? files[0] : value,
     });
   };
+const handleSubmit = async () => {
+  const payload = {
+    recipientName: form.recipientName,
+    department: form.department,
+    employeeId: form.employeeId,
+    jobTitle: form.jobTitle,
+    appreciationType: form.appreciationType,
+    achievement: form.achievement,
+    dob: form.date, // backend expects 'dob'
+    message: form.message,
+    visibility: form.visibility,
+    notify: form.notify,
+    allowComment: form.allowComments, // backend expects 'allowComment'
+  };
+
+  try {
+    const res = await fetch('http://localhost:5000/api/recognition/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Request failed: ${res.status} ${errText}`);
+    }
+
+    const data = await res.json();
+    alert('Recognition submitted successfully!');
+    console.log(data);
+  } catch (error) {
+    console.error('Error submitting recognition:', error);
+    alert('Failed to submit recognition');
+  }
+};
 
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
@@ -189,7 +224,8 @@ const RecognitionForm = () => {
               </div>
               <div className="d-flex justify-content-between">
                 <button onClick={prevStep} className="btn btn-outline-secondary">Back</button>
-                <button onClick={() => alert("Recognition submitted!")} className="btn btn-primary">Send Appreciation</button>
+                <button onClick={handleSubmit} className="btn btn-primary">Send Appreciation</button>
+
               </div>
             </div>
           )}
