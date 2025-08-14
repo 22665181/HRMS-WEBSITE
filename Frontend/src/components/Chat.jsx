@@ -371,7 +371,7 @@ Three Dots Dropdown
     top: calc(100% + 6px); /* ✅ just below button with small gap */
     left: calc(50% + 47px); /* ✅ 38px ≈ 1 cm shift right */
     transform: translateX(-50%);
-    background-color: #4C57C1;
+    background-color: #303031ff;
     border: 1px solid #ddd;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding: 0.5rem;
@@ -1466,15 +1466,6 @@ function ChatWindow({ selectedChat }) {
             }}
           >
             Delete
-          </li>
-
-          <li
-            onClick={() => {
-              setPinnedMessage(contextMenu.message);
-              setContextMenu(null);
-            }}
-          >
-            Pin
           </li>
         </ul>
       )}

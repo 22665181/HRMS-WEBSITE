@@ -402,7 +402,7 @@ body.dark-mode .custom-file-input:hover::before {
 .right-panel {
   flex: 0 0 320px;
   max-width: 320px;
-  min-width: 320px;
+  // min-width: 320px;
   height: 100vh;
   padding: 15px;
   background: linear-gradient(to bottom right, #f0f8ff, #e6f7ff);
@@ -808,7 +808,7 @@ function MainContent({ darkMode}) {
   const [optionsPostId, setOptionsPostId] = useState(null);
 
   return (
-    <div className="main-content">
+    <div className="main-content" style={{margin:'0% 3%', padding:'3% 0%', scrollbarWidth:'none', width: 'auto'}}>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="feed-header">Feed</h4>
         <div>
@@ -1302,7 +1302,7 @@ function MergedFeed() {
       className="app-container d-flex flex-nowrap"
       style={{
         minHeight: '100vh',
-        width: '100vw',
+        // width: '100vw',
         overflowX: 'hidden',
         background: mainBg,
         transition: 'background 0.3s',
@@ -1316,7 +1316,7 @@ function MergedFeed() {
           flex: '1 1 65%',
           minWidth: 0,
           maxWidth: 'calc(100vw - 320px)',
-          padding: '24px 0 24px 0'
+          // padding: '24px 0 24px 0'
         }}
       >
         <MainContent darkMode={darkMode} setDarkMode={setDarkMode} />
@@ -1326,11 +1326,12 @@ function MergedFeed() {
         style={{
           flex: '0 0 320px',
           maxWidth: 320,
-          minWidth: 320,
+          // minWidth: 320,
           height: '100vh',
           borderLeft: `1px solid ${borderColor}`,
           background: mainBg,
-          transition: 'background 0.3s, border-color 0.3s'
+          transition: 'background 0.3s, border-color 0.3s',
+          overflowY: 'hidden',
         }}
       >
         <RightPanel />

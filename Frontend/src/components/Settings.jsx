@@ -8,9 +8,15 @@ import { Toast } from 'react-bootstrap';
 
 
 function Settings() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    // Load from localStorage, default to false
+    return localStorage.getItem('darkMode') === 'true';
+  });
   const toggleDarkMode = () => {
-    setDarkMode((prev) => !prev);
+    setDarkMode((prev) => {
+      localStorage.setItem('darkMode', !prev);
+      return !prev;
+    });
   };
   const [modals, setModals] = useState({});
   const [notification, setNotification] = useState(false);
@@ -83,11 +89,6 @@ function Settings() {
                 <span className="fw-medium">Logout</span>
               </ListGroup.Item>
             </ListGroup>
-          </Col>
-          <Col lg={4} className="text-center d-flex align-items-center">
-            <div className="w-100">
-              <img src="src\assets\settings-side-img.png" alt="Illustration" className="img-fluid" style={{ maxWidth: '400px', opacity: 0.85 }} />
-            </div>
           </Col>
         </Row>
 
