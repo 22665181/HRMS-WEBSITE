@@ -5,19 +5,11 @@ import {
   FaCookieBite, FaEnvelope, FaComment, FaSignOutAlt
 } from 'react-icons/fa';
 import { Toast } from 'react-bootstrap';
+import { useDarkMode } from './Recognition';
 
 
 function Settings() {
-  const [darkMode, setDarkMode] = useState(() => {
-    // Load from localStorage, default to false
-    return localStorage.getItem('darkMode') === 'true';
-  });
-  const toggleDarkMode = () => {
-    setDarkMode((prev) => {
-      localStorage.setItem('darkMode', !prev);
-      return !prev;
-    });
-  };
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [modals, setModals] = useState({});
   const [notification, setNotification] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
@@ -34,57 +26,57 @@ function Settings() {
   );
 
   return (
-    <div className={`${darkMode ? 'dark-mode' : ''} ${modals && Object.values(modals).some(Boolean) ? 'blurred-bg' : ''} min-vh-100`}>
+    <div className={`${isDarkMode ? 'dark-mode' : ''} ${modals && Object.values(modals).some(Boolean) ? 'blurred-bg' : ''} min-vh-100`} style={{ backgroundColor: isDarkMode ? '#121212' : 'transparent' }}>
       <Container fluid className="settings-container" style={{overflowX:'hidden'}}>
         <Row className="justify-content-center">
           <Col lg={8}>
-            <h3 className="settings-title" style={{ fontWeight: 'bold', color: '#333', textAlign: 'center', marginTop: '20px'}}>
+            <h3 className="settings-title" style={{ fontWeight: 'bold', color: isDarkMode ? '#ffffff' : '#333', textAlign: 'center', marginTop: '20px'}}>
               <u>Settings</u>
             </h3>
             <ListGroup variant="flush" className="settings-list mt-4">
-              <ListGroup.Item className="d-flex justify-content-between align-items-center py-3 border-bottom">
+              <ListGroup.Item className={`d-flex justify-content-between align-items-center py-3 border-bottom ${isDarkMode ? 'bg-dark text-light border-secondary' : ''}`}>
                 <div className="d-flex align-items-center gap-3">
                   <FaBell className="text-primary" />
                   <span className="fw-medium">Notification</span>
                 </div>
                 <Form.Check type="switch" checked={notification} onChange={() => setNotification(!notification)} />
               </ListGroup.Item>
-              <ListGroup.Item className="d-flex justify-content-between align-items-center py-3 border-bottom">
+              <ListGroup.Item className={`d-flex justify-content-between align-items-center py-3 border-bottom ${isDarkMode ? 'bg-dark text-light border-secondary' : ''}`}>
                 <div className="d-flex align-items-center gap-3">
                   <FaMoon className="text-primary" />
                   <span className="fw-medium">Dark Mode</span>
                 </div>
-                <Form.Check type="switch" checked={darkMode} onChange={toggleDarkMode} />
+                <Form.Check type="switch" checked={isDarkMode} onChange={toggleDarkMode} />
               </ListGroup.Item>
-              <ListGroup.Item action onClick={() => toggleModal('rateApp')} className="d-flex align-items-center gap-3 py-3 border-bottom">
+              <ListGroup.Item action onClick={() => toggleModal('rateApp')} className={`d-flex align-items-center gap-3 py-3 border-bottom ${isDarkMode ? 'bg-dark text-light border-secondary' : ''}`}>
                 <FaStar className="text-primary" />
                 <span className="fw-medium">Rate App</span>
               </ListGroup.Item>
-              <ListGroup.Item action onClick={() => toggleModal('shareApp')} className="d-flex align-items-center gap-3 py-3 border-bottom">
+              <ListGroup.Item action onClick={() => toggleModal('shareApp')} className={`d-flex align-items-center gap-3 py-3 border-bottom ${isDarkMode ? 'bg-dark text-light border-secondary' : ''}`}>
                 <FaShareAlt className="text-primary" />
                 <span className="fw-medium">Share App</span>
               </ListGroup.Item>
-              <ListGroup.Item action onClick={() => toggleModal('privacyPolicy')} className="d-flex align-items-center gap-3 py-3 border-bottom">
+              <ListGroup.Item action onClick={() => toggleModal('privacyPolicy')} className={`d-flex align-items-center gap-3 py-3 border-bottom ${isDarkMode ? 'bg-dark text-light border-secondary' : ''}`}>
                 <FaLock className="text-primary" />
                 <span className="fw-medium">Privacy Policy</span>
               </ListGroup.Item>
-              <ListGroup.Item action onClick={() => toggleModal('terms')} className="d-flex align-items-center gap-3 py-3 border-bottom">
+              <ListGroup.Item action onClick={() => toggleModal('terms')} className={`d-flex align-items-center gap-3 py-3 border-bottom ${isDarkMode ? 'bg-dark text-light border-secondary' : ''}`}>
                 <FaFileAlt className="text-primary" />
                 <span className="fw-medium">Terms and Conditions</span>
               </ListGroup.Item>
-              <ListGroup.Item action onClick={() => toggleModal('cookies')} className="d-flex align-items-center gap-3 py-3 border-bottom">
+              <ListGroup.Item action onClick={() => toggleModal('cookies')} className={`d-flex align-items-center gap-3 py-3 border-bottom ${isDarkMode ? 'bg-dark text-light border-secondary' : ''}`}>
                 <FaCookieBite className="text-primary" />
                 <span className="fw-medium">Cookies Policy</span>
               </ListGroup.Item>
-              <ListGroup.Item action onClick={() => toggleModal('contact')} className="d-flex align-items-center gap-3 py-3 border-bottom">
+              <ListGroup.Item action onClick={() => toggleModal('contact')} className={`d-flex align-items-center gap-3 py-3 border-bottom ${isDarkMode ? 'bg-dark text-light border-secondary' : ''}`}>
                 <FaEnvelope className="text-primary" />
                 <span className="fw-medium">Contact</span>
               </ListGroup.Item>
-              <ListGroup.Item action onClick={() => toggleModal('feedback')} className="d-flex align-items-center gap-3 py-3 border-bottom">
+              <ListGroup.Item action onClick={() => toggleModal('feedback')} className={`d-flex align-items-center gap-3 py-3 border-bottom ${isDarkMode ? 'bg-dark text-light border-secondary' : ''}`}>
                 <FaComment className="text-primary" />
                 <span className="fw-medium">Feedback</span>
               </ListGroup.Item>
-              <ListGroup.Item action className="d-flex align-items-center gap-3 py-3 text-danger" onClick={() => toggleModal('logout')}>
+              <ListGroup.Item action className={`d-flex align-items-center gap-3 py-3 text-danger ${isDarkMode ? 'bg-dark border-secondary' : ''}`} onClick={() => toggleModal('logout')}>
                 <FaSignOutAlt className="text-danger" />
                 <span className="fw-medium">Logout</span>
               </ListGroup.Item>
