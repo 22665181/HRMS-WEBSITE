@@ -1,690 +1,1044 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import "bootstrap/dist/css/bootstrap.min.css"
-import { Container, Row, Col, Card, Dropdown, Button, Nav, ListGroup } from "react-bootstrap"
+import { useState, useMemo } from "react"
+import { useDarkMode } from "./Recognition"
+import { FaSearch, FaUserFriends, FaCheck, FaPlaneDeparture, FaRegChartBar, FaCog } from "react-icons/fa";
+
+// import "../index.css"
 import {
-  LayoutDashboard,
-  MessageCircle,
-  Users,
-  FileText,
-  Award,
-  Calendar,
-  User,
-  Settings,
-  TrendingUp,
-  TrendingDown,
-  MoreHorizontal,
-  Video,
-} from "lucide-react"
-import Highcharts from "highcharts"
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+} from "recharts"
 
-// Inline CSS Styles
-const styles = `
-/* Global Styles */
-.dashboard-container {
-  background-color: #f8f9fa;
-  min-height: 100vh;
-}
+const Dashboard = () => {
+  const { isDarkMode } = useDarkMode()
+  const [selectedTimeframe, setSelectedTimeframe] = useState("month")
+  const [selectedDepartment, setSelectedDepartment] = useState("all")
+  const [showModal, setShowModal] = useState(false)
+  const [modalData, setModalData] = useState(null)
+  const [hoveredCard, setHoveredCard] = useState(null)
 
-.main-content {
-  background-color: #f8f9fa;
-  padding: 0;
-}
-
-/* Dashboard Header */
-.dashboard-header {
-  background: white;
-  padding: 20px 30px;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.dashboard-title {
-  font-size: 28px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-}
-
-.dashboard-content {
-  padding: 30px;
-}
-
-/* Stats Cards */
-.stats-row {
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  height: 100%;
-}
-
-.stat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-
-.stat-title {
-  font-size: 14px;
-  color: #666;
-  font-weight: 500;
-}
-
-.stat-change {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  margin-left: auto;
-}
-
-.stat-change.positive {
-  color: #10b981;
-}
-
-.stat-change.negative {
-  color: #ef4444;
-}
-
-.stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 4px;
-}
-
-.stat-subtitle {
-  font-size: 12px;
-  color: #999;
-}
-
-/* Chart Card */
-.chart-card {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.chart-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-}
-
-.chart-toggles {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.toggle-switch {
-  width: 40px;
-  height: 20px;
-  background: #e5e7eb;
-  border-radius: 10px;
-  position: relative;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.toggle-switch.active {
-  background: #4a90e2;
-}
-
-.toggle-switch.active.yellow {
-  background: #f5a623;
-}
-
-.toggle-switch.active.orange {
-  background: #d0021b;
-}
-
-.toggle-slider {
-  width: 16px;
-  height: 16px;
-  background: white;
-  border-radius: 50%;
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  transition: transform 0.2s ease;
-}
-
-.toggle-label {
-  font-size: 14px;
-  color: #666;
-  font-weight: 500;
-}
-
-/* Meetings Card */
-.meetings-card {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.card-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-}
-
-.create-new-btn {
-  color: #4a90e2;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 0;
-}
-
-.meetings-list {
-  border: none;
-}
-
-.meeting-item {
-  border: none;
-  padding: 15px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.meeting-item:last-child {
-  border-bottom: none;
-}
-
-.meeting-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
-}
-
-.meeting-icon.warning {
-  background: #fef3c7;
-  color: #f59e0b;
-}
-
-.meeting-icon.info {
-  background: #dbeafe;
-  color: #3b82f6;
-}
-
-.meeting-icon.success {
-  background: #d1fae5;
-  color: #10b981;
-}
-
-.meeting-details {
-  flex: 1;
-}
-
-.meeting-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
-}
-
-.meeting-time {
-  font-size: 12px;
-  color: #666;
-}
-
-.meeting-status {
-  display: flex;
-  align-items: center;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.status-dot.warning {
-  background: #f59e0b;
-}
-
-.status-dot.info {
-  background: #3b82f6;
-}
-
-.status-dot.success {
-  background: #10b981;
-}
-
-/* Employee Composition */
-.composition-card {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.employee-composition {
-  position: relative;
-}
-
-.composition-chart {
-  margin-bottom: 20px;
-}
-
-.composition-stats {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stat-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-.stat-percentage {
-  font-size: 18px;
-  font-weight: 700;
-  color: #333;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .dashboard-content {
-    padding: 20px 15px;
+  const baseData = {
+    week: {
+      kpis: {
+        totalEmployees: { value: 1247, change: "+2%", period: "from last week" },
+        activeToday: { value: 1189, percentage: "95.3%", label: "attendance rate" },
+        onLeave: { value: 58, percentage: "4.7%", label: "of workforce" },
+        avgPerformance: { value: "8.7/10", change: "+0.1", period: "from last week" },
+      },
+      monthlyHiring: [
+        { month: "Mon", hires: 12, departures: 2 },
+        { month: "Tue", hires: 8, departures: 1 },
+        { month: "Wed", hires: 15, departures: 3 },
+        { month: "Thu", hires: 10, departures: 1 },
+        { month: "Fri", hires: 18, departures: 2 },
+        { month: "Sat", hires: 5, departures: 0 },
+        { month: "Sun", hires: 3, departures: 1 },
+      ],
+    },
+    month: {
+      kpis: {
+        totalEmployees: { value: 1247, change: "+12%", period: "from last month" },
+        activeToday: { value: 1189, percentage: "95.3%", label: "attendance rate" },
+        onLeave: { value: 58, percentage: "4.7%", label: "of workforce" },
+        avgPerformance: { value: "8.7/10", change: "+0.3", period: "from last month" },
+      },
+      monthlyHiring: [
+        { month: "Jan", hires: 45, departures: 12 },
+        { month: "Feb", hires: 52, departures: 8 },
+        { month: "Mar", hires: 38, departures: 15 },
+        { month: "Apr", hires: 61, departures: 9 },
+        { month: "May", hires: 49, departures: 11 },
+        { month: "Jun", hires: 67, departures: 7 },
+      ],
+    },
+    quarter: {
+      kpis: {
+        totalEmployees: { value: 1247, change: "+18%", period: "from last quarter" },
+        activeToday: { value: 1189, percentage: "95.3%", label: "attendance rate" },
+        onLeave: { value: 58, percentage: "4.7%", label: "of workforce" },
+        avgPerformance: { value: "8.7/10", change: "+0.5", period: "from last quarter" },
+      },
+      monthlyHiring: [
+        { month: "Q1", hires: 135, departures: 35 },
+        { month: "Q2", hires: 177, departures: 27 },
+        { month: "Q3", hires: 156, departures: 31 },
+        { month: "Q4", hires: 189, departures: 22 },
+      ],
+    },
+    year: {
+      kpis: {
+        totalEmployees: { value: 1247, change: "+25%", period: "from last year" },
+        activeToday: { value: 1189, percentage: "95.3%", label: "attendance rate" },
+        onLeave: { value: 58, percentage: "4.7%", label: "of workforce" },
+        avgPerformance: { value: "8.7/10", change: "+0.8", period: "from last year" },
+      },
+      monthlyHiring: [
+        { month: "2020", hires: 456, departures: 123 },
+        { month: "2021", hires: 523, departures: 98 },
+        { month: "2022", hires: 612, departures: 145 },
+        { month: "2023", hires: 687, departures: 112 },
+        { month: "2024", hires: 734, departures: 89 },
+      ],
+    },
   }
 
-  .chart-toggles {
-    flex-direction: column;
-    gap: 10px;
+  const staticData = {
+    recentActivities: [
+      {
+        id: 1,
+        name: "Sarah Anderson",
+        action: "joined the Marketing team",
+        time: "2 hours ago",
+        type: "New Hire",
+        avatar: "/api/placeholder/40/40",
+      },
+      {
+        id: 2,
+        name: "Michael Johnson",
+        action: "completed performance review",
+        time: "4 hours ago",
+        type: "Review",
+        avatar: "/api/placeholder/40/40",
+      },
+      {
+        id: 3,
+        name: "Emily Wilson",
+        action: "requested vacation leave",
+        time: "6 hours ago",
+        type: "Leave Request",
+        avatar: "/api/placeholder/40/40",
+      },
+    ],
+    departments: [
+      { name: "Health", count: 342, color: "#ef4444ff" },
+      { name: "Sales", count: 289, color: "#10b981" },
+      { name: "Marketing", count: 156, color: "#06b6d4" },
+      { name: "Training", count: 89, color: "#f97316" },
+      { name: "Design", count: 89, color: "#6366f1" },
+    ],
+    employeeTypes: [
+      { name: "Full-Time", value: 856, color: "#8b5cf6" },
+      { name: "Part-Time", value: 234, color: "#06b6d4" },
+      { name: "Contract", value: 157, color: "#f97316" },
+    ],
+    performanceMetrics: [
+      { department: "Health", performance: 8.9 },
+      { department: "Sales", performance: 8.5 },
+      { department: "Marketing", performance: 8.7 },
+      { department: "Training", performance: 9.1 },
+      { department: "Design", performance: 10 },
+    ],
+    attendanceTrend: [
+      { week: "Week 1", attendance: 94.2 },
+      { week: "Week 2", attendance: 95.8 },
+      { week: "Week 3", attendance: 93.5 },
+      { week: "Week 4", attendance: 96.1 },
+      { week: "Week 5", attendance: 95.3 },
+    ],
   }
 
-  .composition-stats {
-    gap: 20px;
-  }
-}
-`
+  const dashboardData = useMemo(() => {
+    const timeframeData = baseData[selectedTimeframe]
+    let filteredDepartments = staticData.departments
 
-// Stats Cards Component
-
-const StatsCards = () => {
-  const stats = [
-    {
-      title: "Total Employees",
-      value: "856",
-      subtitle: "All time",
-      change: "+30.5%",
-      positive: true,
-      color: "blue",
-    },
-    {
-      title: "Job View",
-      value: "3,342",
-      subtitle: "",
-      change: "+22.5%",
-      positive: true,
-      color: "blue",
-    },
-    {
-      title: "Job Applied",
-      value: "77",
-      subtitle: "",
-      change: "+12.5%",
-      positive: true,
-      color: "green",
-    },
-    {
-      title: "Resigned Employees",
-      value: "17",
-      subtitle: "",
-      change: "-3.2%",
-      positive: false,
-      color: "red",
-    },
-  ]
-
-  return (
-    <Row className="stats-row">
-      {stats.map((stat, index) => (
-        <Col key={index} md={6} lg={3} className="mb-3">
-          <Card className="stat-card">
-            <Card.Body>
-              <div className="stat-header">
-                <span className="stat-title">{stat.title}</span>
-                <span className={`stat-change ${stat.positive ? "positive" : "negative"}`}>
-                  {stat.positive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                  {stat.change}
-                </span>
-              </div>
-              <div className="stat-value">{stat.value}</div>
-              {stat.subtitle && <div className="stat-subtitle">{stat.subtitle}</div>}
-            </Card.Body>
-          </Card>
-        </Col>
-      ))}
-    </Row>
-  )
-}
-
-// Applications Chart Component
-const ApplicationsChart = () => {
-  const chartRef = useRef(null)
-
-  useEffect(() => {
-    if (chartRef.current) {
-      Highcharts.chart(chartRef.current, {
-        chart: {
-          type: "column",
-          height: 300,
-          backgroundColor: "transparent",
-        },
-        title: {
-          text: "",
-        },
-        xAxis: {
-          categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-          lineWidth: 0,
-          tickWidth: 0,
-          labels: {
-            style: {
-              color: "#666",
-              fontSize: "12px",
-            },
-          },
-        },
-        yAxis: {
-          title: {
-            text: "",
-          },
-          gridLineWidth: 1,
-          gridLineColor: "#f0f0f0",
-          labels: {
-            style: {
-              color: "#666",
-              fontSize: "12px",
-            },
-          },
-          max: 100,
-        },
-        legend: {
-          enabled: false,
-        },
-        plotOptions: {
-          column: {
-            pointPadding: 0.1,
-            borderWidth: 0,
-            groupPadding: 0.1,
-            pointWidth: 20,
-          },
-        },
-        series: [
-          {
-            name: "Applications",
-            data: [65, 70, 75, 80, 85, 75, 90, 85, 80, 75, 70, 65],
-            color: "#4A90E2",
-            type: "column",
-          },
-          {
-            name: "Shortlisted",
-            data: [45, 50, 55, 60, 65, 55, 70, 65, 60, 55, 50, 45],
-            color: "#F5A623",
-            type: "column",
-          },
-          {
-            name: "Rejected",
-            data: [25, 30, 35, 40, 45, 35, 50, 45, 40, 35, 30, 25],
-            color: "#D0021B",
-            type: "column",
-          },
-        ],
-        credits: {
-          enabled: false,
-        },
-      })
+    if (selectedDepartment !== "all") {
+      filteredDepartments = staticData.departments.filter((dept) => dept.name === selectedDepartment)
     }
-  }, [])
 
-  return <div ref={chartRef} className="applications-chart"></div>
-}
+    return {
+      ...timeframeData,
+      ...staticData,
+      departments: filteredDepartments,
+    }
+  }, [selectedTimeframe, selectedDepartment])
 
-// Meetings List Component
-const MeetingsList = () => {
-  const meetings = [
-    {
-      type: "Interview",
-      title: "Interview",
-      time: "Today 09:30 AM to 10:30 AM",
-      icon: Video,
-      color: "warning",
-    },
-    {
-      type: "Meeting",
-      title: "Departmental meeting",
-      time: "Today 12:30 PM to 01:30 PM",
-      icon: Users,
-      color: "info",
-    },
-    {
-      type: "Meeting",
-      title: "Meeting with the manager",
-      time: "Tomorrow 09:30 AM to 10:30 AM",
-      icon: User,
-      color: "success",
-    },
-  ]
+  const handleKPIClick = (kpiType, data) => {
+    setModalData({ type: kpiType, data })
+    setShowModal(true)
+  }
+
+  const handleChartClick = (data, chartType) => {
+    setModalData({ type: chartType, data })
+    setShowModal(true)
+  }
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+          <p className="font-medium text-gray-800">{label}</p>
+          {payload.map((entry, index) => (
+            <p key={index} className="text-sm" style={{ color: entry.color }}>
+              {entry.name}: {entry.value}
+            </p>
+          ))}
+        </div>
+      )
+    }
+    return null
+  }
+
+  const maxDeptCount = Math.max(...dashboardData.departments.map((d) => d.count))
 
   return (
-    <ListGroup variant="flush" className="meetings-list">
-      {meetings.map((meeting, index) => {
-        const IconComponent = meeting.icon
-        return (
-          <ListGroup.Item key={index} className="meeting-item">
-            <div className="d-flex align-items-center">
-              <div className={`meeting-icon ${meeting.color}`}>
-                <IconComponent size={16} />
-              </div>
-              <div className="meeting-details flex-grow-1">
-                <div className="meeting-title">{meeting.title}</div>
-                <div className="meeting-time">{meeting.time}</div>
-              </div>
-              <div className="meeting-status">
-                <div className={`status-dot ${meeting.color}`}></div>
+    <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+      {/* Header */}
+      <header
+        className={`shadow-sm border-b transition-colors duration-300 px-4 sm:px-6 py-4 ${
+          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <h1
+              className={`text-xl sm:text-2xl font-bold transition-colors duration-300 ${
+                isDarkMode ? "text-white" : "text-gray-800"
+              }`}
+            >
+              HR Portal
+            </h1>
+          </div>
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <select
+              value={selectedTimeframe}
+              onChange={(e) => setSelectedTimeframe(e.target.value)}
+              className={`px-2 sm:px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-colors duration-300 ${
+                isDarkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"
+              }`}
+            >
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="quarter">This Quarter</option>
+              <option value="year">This Year</option>
+            </select>
+            <div className="relative hidden sm:block">
+              <input
+                type="text"
+                placeholder="Search employees..."
+                className={`pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-48 lg:w-64 ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                }`}
+              />
+              <div
+                className={`absolute inset-y-0 left-3 flex items-center transition-colors duration-300 ${
+                  isDarkMode ? "text-gray-400" : "text-gray-400"
+                }`}
+              >
+                <FaSearch className="text-lg text-grey"/>
               </div>
             </div>
-          </ListGroup.Item>
-        )
-      })}
-    </ListGroup>
-  )
-}
+            <button
+              className={`p-2 transition-colors duration-200 ${
+                isDarkMode ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-800"
+              }`}
+            >
+            <FaCog className="text-2xl"/>
 
-// Employee Composition Component
-const EmployeeComposition = () => {
-  const chartRef = useRef(null)
 
-  useEffect(() => {
-    if (chartRef.current) {
-      Highcharts.chart(chartRef.current, {
-        chart: {
-          type: "pie",
-          height: 250,
-          backgroundColor: "transparent",
-        },
-        title: {
-          text: "",
-        },
-        plotOptions: {
-          pie: {
-            innerSize: "60%",
-            dataLabels: {
-              enabled: false,
-            },
-            showInLegend: false,
-          },
-        },
-        series: [
-          {
-            name: "Employees",
-            data: [
-              { name: "Department A", y: 35, color: "#4A90E2" },
-              { name: "Department B", y: 14, color: "#50E3C2" },
-              { name: "Others", y: 51, color: "#E8E8E8" },
-            ],
-            type: "pie",
-          },
-        ],
-        credits: {
-          enabled: false,
-        },
-      })
-    }
-  }, [])
-
-  return (
-    <div className="employee-composition">
-      <div ref={chartRef} className="composition-chart"></div>
-      <div className="composition-stats">
-        <div className="stat-item">
-          <div className="stat-color" style={{ backgroundColor: "#4A90E2" }}></div>
-          <span className="stat-percentage">35%</span>
+            </button>
+            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-200 cursor-pointer">
+              <span className="text-white text-sm font-medium">JD</span>
+            </div>
+          </div>
         </div>
-        <div className="stat-item">
-          <div className="stat-color" style={{ backgroundColor: "#50E3C2" }}></div>
-          <span className="stat-percentage">14%</span>
-        </div>
-      </div>
-    </div>
-  )
-}
+      </header> 
+    
 
-// Main Dashboard Component
-const Dashboard = () => {
-  const [selectedMonth, setSelectedMonth] = useState("July")
+      {/* Main Content */}
+      <main className="p-4 sm:p-6">
+        {/* Welcome Section */}
+        <section className="mb-6 sm:mb-8">
+          <h2
+            className={`text-2xl sm:text-3xl font-bold mb-2 transition-colors duration-300 ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
+            Dashboard Overview
+          </h2>
+          <p
+            className={`text-sm sm:text-base transition-colors duration-300 ${
+              isDarkMode ? "text-gray-300" : "text-gray-600"
+            }`}
+          >
+            Welcome back! Here's what's happening with your team today.
+          </p>
+        </section>
 
-  return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h2 className="dashboard-title">Dashboard</h2>
-      </div>
+        {/* KPI Cards - keeping existing gradients */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div
+            className={`bg-gradient-to-br from-[#EBDDFE] to-[#D5B9FA] rounded-xl p-4 sm:p-6 text-gray-800 shadow-lg cursor-pointer transform transition-all duration-300 ${hoveredCard === "employees" ? "scale-105 shadow-xl" : "hover:scale-105 hover:shadow-xl"}`}
+            onMouseEnter={() => setHoveredCard("employees")}
+            onMouseLeave={() => setHoveredCard(null)}
+            onClick={() => handleKPIClick("employees", dashboardData.kpis.totalEmployees)}
+          >
+            <div className={"flex items-center justify-between"}>
+              <div>
+                <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-400" : "text-purple-700"}`}>Total Employees</p>
+                <p className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-purple-500" : "text-purple-900"}`}>
+                  {dashboardData.kpis.totalEmployees.value.toLocaleString()}
+                </p>
+                <p className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-purple-300" : "text-purple-600"}`}>
+                  {dashboardData.kpis.totalEmployees.change} {dashboardData.kpis.totalEmployees.period}
+                </p>
+              </div>
+              <div className="bg-white bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
+                <span className="text-xl sm:text-2xl"><FaUserFriends className={` ${isDarkMode ? "bg-gray-900 text-purple-500" : "text-purple-900"}`}/> </span>
+              </div>
+            </div>
+          </div>
 
-      <Container fluid className="dashboard-content">
-        <StatsCards />
+          <div
+            className={`rounded-xl p-4 sm:p-6 text-gray-800 shadow-lg cursor-pointer transform transition-all duration-300 ${hoveredCard === "active" ? "scale-105 shadow-xl" : "hover:scale-105 hover:shadow-xl"}`}
+            onMouseEnter={() => setHoveredCard("active")}
+            onMouseLeave={() => setHoveredCard(null)}
+            onClick={() => handleKPIClick("active", dashboardData.kpis.activeToday)}
+          >
+            <div className="flex items-center justify-between ">
+              <div>
+                <p className={` text-xs sm:text-sm font-medium ${isDarkMode ? "text-green-400" : "text-green-700"}`}>Active Today</p>
+                <p className={`text-2xl sm:text-3xl font-bold  ${isDarkMode ? "text-green-500" : "text-green-900"}`}>
+                  {dashboardData.kpis.activeToday.value.toLocaleString()}
+                </p>
+                <p className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-green-300" : "text-green-600"}`}>
+                  {dashboardData.kpis.activeToday.percentage} {dashboardData.kpis.activeToday.label}
+                </p>
+              </div>
+              <div className="bg-white bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
+                <span className="text-xl sm:text-2xl"><FaCheck className={` ${isDarkMode ? "bg-gray-900 text-green-500" : "text-green-900"}`} /></span>
+              </div>
+            </div>
+          </div>
 
-        <Row className="mt-4">
-          <Col>
-            <Card className="chart-card">
-              <Card.Body>
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="chart-title">Statistics of active applications</h5>
-                  <div className="d-flex align-items-center gap-3">
-                    <div className="chart-toggles d-flex gap-3">
-                      <div className="d-flex align-items-center gap-2">
-                        <div className="toggle-switch active">
-                          <div className="toggle-slider"></div>
+          <div
+            className={`bg-gradient-to-br from-[#D8F0FB] to-[#A9DCF4] rounded-xl p-4 sm:p-6 text-gray-800 shadow-lg cursor-pointer transform transition-all duration-300 ${hoveredCard === "leave" ? "scale-105 shadow-xl" : "hover:scale-105 hover:shadow-xl"}`}
+            onMouseEnter={() => setHoveredCard("leave")}
+            onMouseLeave={() => setHoveredCard(null)}
+            onClick={() => handleKPIClick("leave", dashboardData.kpis.onLeave)}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-blue-400 " : "text-blue-700 "}`}>On Leave</p>
+                <p className={`text-2xl sm:text-3xl font-bold  ${isDarkMode ? "text-blue-500" : "text-blue-900"}`}>{dashboardData.kpis.onLeave.value}</p>
+                <p className={` text-xs sm:text-sm mt-1 ${isDarkMode ? "text-blue-300" : "text-blue-600"}`}>
+                  {dashboardData.kpis.onLeave.percentage} {dashboardData.kpis.onLeave.label}
+                </p>
+              </div>
+              <div className="bg-white bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
+                <span className="text-xl sm:text-2xl"><FaPlaneDeparture className={` ${isDarkMode ? "bg-gray-900 text-blue-500" : "text-blue-900"}`}/></span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={`bg-gradient-to-br from-[#FFE8D4] to-[#FFC9A7] rounded-xl p-4 sm:p-6 text-gray-800 shadow-lg cursor-pointer transform transition-all duration-300 ${hoveredCard === "performance" ? "scale-105 shadow-xl" : "hover:scale-105 hover:shadow-xl"}`}
+            onMouseEnter={() => setHoveredCard("performance")}
+            onMouseLeave={() => setHoveredCard(null)}
+            onClick={() => handleKPIClick("performance", dashboardData.kpis.avgPerformance)}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={` text-xs sm:text-sm font-medium ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Avg Performance</p>
+                <p className={`text-2xl sm:text-3xl font-bold  ${isDarkMode ? "text-red-600" : "text-red-700"} `}>
+                  {dashboardData.kpis.avgPerformance.value}
+                </p>
+                <p className={` text-xs sm:text-sm mt-1 ${isDarkMode ? "text-red-400" : "text-red-500"}`}>
+                  {dashboardData.kpis.avgPerformance.change} {dashboardData.kpis.avgPerformance.period}
+                </p>
+              </div>
+              <div className="bg-white bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
+                <span className="text-xl sm:text-2xl"><FaRegChartBar className={`${isDarkMode ? "bg-gray-900 text-red-700 " : "text-red-700 "}`}/></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          {/* Employee Types Pie Chart */}
+          <div
+            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
+              isDarkMode ? "bg-gray-800" : "bg-white"
+            }`}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3
+                className={`text-lg font-semibold transition-colors duration-300 ${
+                  isDarkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                Employee Types
+              </h3>
+              <button
+                onClick={() => handleChartClick(dashboardData.employeeTypes, "employeeTypes")}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
+              >
+                View Details →
+              </button>
+            </div>
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={dashboardData.employeeTypes}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
+                  paddingAngle={5}
+                  dataKey="value"
+                  onClick={(data) => handleChartClick(data, "pieSlice")}
+                  className="cursor-pointer"
+                >
+                  {dashboardData.employeeTypes.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.color}
+                      className="hover:opacity-80 transition-opacity duration-200"
+                    />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="flex justify-center space-x-4 mt-4">
+              {dashboardData.employeeTypes.map((type) => (
+                <div
+                  key={type.name}
+                  className="flex items-center cursor-pointer hover:opacity-75 transition-opacity duration-200"
+                >
+                  <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: type.color }}></div>
+                  <span
+                    className={`text-sm transition-colors duration-300 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
+                  >
+                    {type.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Monthly Hiring Trends - now updates based on timeframe */}
+          <div
+            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
+              isDarkMode ? "bg-gray-800" : "bg-white"
+            }`}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3
+                className={`text-lg font-semibold transition-colors duration-300 ${
+                  isDarkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                {selectedTimeframe === "week"
+                  ? "Daily"
+                  : selectedTimeframe === "month"
+                    ? "Monthly"
+                    : selectedTimeframe === "quarter"
+                      ? "Quarterly"
+                      : "Yearly"}{" "}
+                Hiring Trends
+              </h3>
+              <button
+                onClick={() => handleChartClick(dashboardData.monthlyHiring, "hiringTrends")}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
+              >
+                View Details →
+              </button>
+            </div>
+            <ResponsiveContainer width="100%" height={250}>
+              <AreaChart data={dashboardData.monthlyHiring}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="hires"
+                  stackId="1"
+                  stroke="#10b981"
+                  fill="#10b981"
+                  fillOpacity={0.6}
+                  className="cursor-pointer"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="departures"
+                  stackId="2"
+                  stroke="#ef4444"
+                  fill="#ef4444"
+                  fillOpacity={0.6}
+                  className="cursor-pointer"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div
+            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
+              isDarkMode ? "bg-gray-800" : "bg-white"
+            }`}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3
+                className={`text-lg font-semibold transition-colors duration-300 ${
+                  isDarkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                Performance by Department
+              </h3>
+              <button
+                onClick={() => handleChartClick(dashboardData.performanceMetrics, "performance")}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
+              >
+                View Details →
+              </button>
+            </div>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={dashboardData.performanceMetrics} layout="vertical" margin={{ left: 80 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" domain={[0, 10]} />
+                <YAxis dataKey="department" type="category" width={80} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar
+                  dataKey="performance"
+                  fill="#8b5cf6"
+                  radius={[0, 4, 4, 0]}
+                  onClick={(data) => handleChartClick(data, "performanceBar")}
+                  className="cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+          <div
+            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
+              isDarkMode ? "bg-gray-800" : "bg-white"
+            }`}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3
+                  className={`text-lg font-semibold flex items-center transition-colors duration-300 ${
+                    isDarkMode ? "text-white" : "text-gray-800"
+                  }`}
+                >
+                  Recent Activities
+                  <span className="ml-2 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                </h3>
+                <p
+                  className={`text-sm sm:text-base transition-colors duration-300 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  Latest updates from your HR system
+                </p>
+              </div>
+              <button className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200">
+                View All →
+              </button>
+            </div>
+            <div className="space-y-4">
+              {dashboardData.recentActivities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className={`flex items-center space-x-4 p-3 rounded-lg transition-all duration-200 cursor-pointer transform hover:scale-[1.02] ${
+                    activity.type === "New Hire"
+                        ? "bg-green-100 text-green-800 hover:bg-green-300"
+                        : activity.type === "Review"
+                          ? "bg-blue-100 text-blue-800 hover:bg-blue-300"
+                          : "bg-yellow-100 text-yellow-800 hover:bg-yellow-300"
+                  }`}
+                  onClick={() => handleChartClick(activity, "activity")}
+                >
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center hover:rotate-6 transition-transform duration-200">
+                    <span className="text-white text-sm font-medium">
+                      {activity.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <div
+                      className={`text-sm transition-colors duration-300 `}
+                    >
+                      <strong>{activity.name}</strong> {activity.action}
+                    </div>
+                    <div
+                      className={`text-xs transition-colors duration-300  `}
+                    >
+                      {activity.time}
+                    </div>
+                  </div>
+                  <div
+                    className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-110 ${
+                      activity.type === "New Hire"
+                        ? "bg-green-200 text-green-800 hover:bg-green-200"
+                        : activity.type === "Review"
+                          ? "bg-blue-200 text-blue-800 hover:bg-blue-200"
+                          : "bg-yellow-200 text-yellow-800 hover:bg-yellow-200"
+                    }`}
+                  >
+                    {activity.type}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Department Overview with Attendance Trend */}
+          <div className="space-y-4 sm:space-y-6">
+            <div
+              className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                isDarkMode ? "bg-gray-800" : "bg-white"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3
+                  className={`text-lg font-semibold transition-colors duration-300 ${
+                    isDarkMode ? "text-white" : "text-gray-800"
+                  }`}
+                >
+                  Department Overview
+                </h3>
+                <select
+                  value={selectedDepartment}
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  className={`px-3 py-1 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-300 ${
+                    isDarkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"
+                  }`}
+                >
+                  <option value="all">All Departments</option>
+                  {staticData.departments.map((dept) => (
+                    <option key={dept.name} value={dept.name}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <p
+                className={`text-sm sm:text-base mb-4 transition-colors duration-300 ${
+                  isDarkMode ? "text-gray-300" : "text-gray-600"
+                }`}
+              >
+                Employee distribution by department
+              </p>
+              <div className="space-y-4">
+                {dashboardData.departments.map((dept) => (
+                  <div
+                    key={dept.name}
+                    className={`flex items-center justify-between cursor-pointer p-2 sm:p-3 rounded-lg transition-all duration-200 ${
+                      isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-50"
+                    }`}
+                    onClick={() => handleChartClick(dept, "department")}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div
+                        className="w-4 h-4 rounded transition-transform duration-200 hover:scale-125"
+                        style={{ backgroundColor: dept.color }}
+                      ></div>
+                      <span
+                        className={`text-sm font-medium transition-colors duration-300 ${
+                          isDarkMode ? "text-gray-200" : "text-gray-700"
+                        }`}
+                      >
+                        {dept.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div
+                        className={`w-32 rounded-full h-2 overflow-hidden ${isDarkMode ? "bg-gray-600" : "bg-gray-200"}`}
+                      >
+                        <div
+                          className="h-2 rounded-full transition-all duration-500 hover:brightness-110"
+                          style={{
+                            width: `${(dept.count / maxDeptCount) * 100}%`,
+                            backgroundColor: dept.color,
+                          }}
+                        ></div>
+                      </div>
+                      <span
+                        className={`text-sm w-20 text-right transition-colors duration-300 ${
+                          isDarkMode ? "text-gray-300" : "text-gray-600"
+                        }`}
+                      >
+                        {dept.count} employees
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div
+              className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                isDarkMode ? "bg-gray-800" : "bg-white"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3
+                  className={`text-lg font-semibold transition-colors duration-300 ${
+                    isDarkMode ? "text-white" : "text-gray-800"
+                  }`}
+                >
+                  Attendance Trend
+                </h3>
+                <button
+                  onClick={() => handleChartClick(dashboardData.attendanceTrend, "attendance")}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
+                >
+                  View Details →
+                </button>
+              </div>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={dashboardData.attendanceTrend}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="week" />
+                  <YAxis domain={[90, 100]} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line
+                    type="monotone"
+                    dataKey="attendance"
+                    stroke="#10b981"
+                    strokeWidth={3}
+                    dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: "#10b981", strokeWidth: 2, fill: "#fff" }}
+                    className="cursor-pointer"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div
+            className={`rounded-xl p-4 sm:p-6 max-w-4xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-y-auto transform transition-all duration-300 scale-100 mx-2 sm:mx-0 ${
+              isDarkMode ? "bg-gray-800" : "bg-white"
+            }`}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3
+                className={`text-xl sm:text-2xl font-semibold transition-colors duration-300 ${
+                  isDarkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                {modalData?.type === "employees" && "Employee Details"}
+                {modalData?.type === "active" && "Active Employees Today"}
+                {modalData?.type === "leave" && "Employees on Leave"}
+                {modalData?.type === "performance" && "Performance Metrics"}
+                {modalData?.type === "employeeTypes" && "Employee Type Distribution"}
+                {modalData?.type === "hiringTrends" && "Hiring Trends Analysis"}
+                {modalData?.type === "attendance" && "Attendance Analysis"}
+                {modalData?.type === "department" && `${modalData?.data?.name} Department`}
+                {modalData?.type === "activity" && "Activity Details"}
+              </h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className={`text-2xl transition-colors duration-200 rounded-full w-8 h-8 flex items-center justify-center ${
+                  isDarkMode
+                    ? "text-gray-400 hover:text-gray-200 hover:bg-gray-700"
+                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className={`transition-colors duration-300 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+              {modalData?.type === "employees" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
+                      <h4 className="font-semibold text-blue-800">Total Count</h4>
+                      <p className="text-2xl font-bold text-blue-900">{modalData.data.value}</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg">
+                      <h4 className="font-semibold text-green-800">Growth</h4>
+                      <p className="text-2xl font-bold text-green-900">{modalData.data.change}</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg">
+                      <h4 className="font-semibold text-purple-800">Period</h4>
+                      <p className="text-lg font-medium text-purple-900">{modalData.data.period}</p>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-3">Employee Breakdown</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>New Hires: 67 employees</div>
+                      <div>Departures: 7 employees</div>
+                      <div>Promotions: 23 employees</div>
+                      <div>Transfers: 12 employees</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {modalData?.type === "active" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg">
+                      <h4 className="font-semibold text-green-800">Present Today</h4>
+                      <p className="text-2xl font-bold text-green-900">{modalData.data.value}</p>
+                      <p className="text-sm text-green-700">{modalData.data.percentage} attendance rate</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-red-50 to-red-100 p-4 rounded-lg">
+                      <h4 className="font-semibold text-red-800">Absent Today</h4>
+                      <p className="text-2xl font-bold text-red-900">{1247 - modalData.data.value}</p>
+                      <p className="text-sm text-red-700">
+                        {(100 - Number.parseFloat(modalData.data.percentage)).toFixed(1)}% absent
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-3">Attendance by Department</h4>
+                    <div className="space-y-2">
+                      {dashboardData.departments.map((dept) => (
+                        <div key={dept.name} className="flex justify-between items-center">
+                          <span>{dept.name}</span>
+                          <span className="font-medium">
+                            {Math.floor(dept.count * 0.95)} / {dept.count}
+                          </span>
                         </div>
-                            <span className="toggle-label">Applications</span>
-                          </div>
-                          <div className="d-flex align-items-center gap-2">
-                            <div className="toggle-switch active yellow">
-                              <div className="toggle-slider"></div>
-                            </div>
-                            <span className="toggle-label">Shortlisted</span>
-                          </div>
-                          <div className="d-flex align-items-center gap-2">
-                            <div className="toggle-switch active orange">
-                              <div className="toggle-slider"></div>
-                            </div>
-                            <span className="toggle-label">Rejected</span>
-                          </div>
-                        </div>
-                        <Dropdown>
-                          <Dropdown.Toggle variant="outline-secondary" size="sm">
-                            {selectedMonth}
-                          </Dropdown.Toggle>
-                          <Dropdown.Menu>
-                            <Dropdown.Item onClick={() => setSelectedMonth("January")}>January</Dropdown.Item>
-                            <Dropdown.Item onClick={() => setSelectedMonth("February")}>February</Dropdown.Item>
-                            <Dropdown.Item onClick={() => setSelectedMonth("March")}>March</Dropdown.Item>
-                            <Dropdown.Item onClick={() => setSelectedMonth("April")}>April</Dropdown.Item>
-                            <Dropdown.Item onClick={() => setSelectedMonth("May")}>May</Dropdown.Item>
-                            <Dropdown.Item onClick={() => setSelectedMonth("June")}>June</Dropdown.Item>
-                            <Dropdown.Item onClick={() => setSelectedMonth("July")}>July</Dropdown.Item>
-                          </Dropdown.Menu>
-                        </Dropdown>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {modalData?.type === "leave" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
+                      <h4 className="font-semibold text-blue-800">On Leave</h4>
+                      <p className="text-2xl font-bold text-blue-900">{modalData.data.value}</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 p-4 rounded-lg">
+                      <h4 className="font-semibold text-yellow-800">Pending Requests</h4>
+                      <p className="text-2xl font-bold text-yellow-900">12</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg">
+                      <h4 className="font-semibold text-green-800">Approved Today</h4>
+                      <p className="text-2xl font-bold text-green-900">5</p>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-3">Leave Types</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex justify-between">
+                        <span>Vacation</span>
+                        <span className="font-medium">32</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Sick Leave</span>
+                        <span className="font-medium">15</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Personal</span>
+                        <span className="font-medium">8</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Maternity</span>
+                        <span className="font-medium">3</span>
                       </div>
                     </div>
-                    <ApplicationsChart />
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
+                  </div>
+                </div>
+              )}
 
-            <Row className="mt-4">
-              <Col md={6}>
-                <Card className="meetings-card">
-                  <Card.Body>
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                      <h5 className="card-title">Meetings</h5>
-                      <Button variant="link" className="create-new-btn">
-                        Create new
-                      </Button>
-                    </div>
-                    <MeetingsList />
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={6}>
-                <Card className="composition-card">
-                  <Card.Body>
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                      <h5 className="card-title">Employee Composition</h5>
-                      <div className="d-flex align-items-center gap-2">
-                        <span className="text-muted small">All Departments</span>
-                        <MoreHorizontal size={16} className="text-muted" />
+              {modalData?.type === "employeeTypes" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {dashboardData.employeeTypes.map((type) => (
+                      <div
+                        key={type.name}
+                        className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border-l-4"
+                        style={{ borderColor: type.color }}
+                      >
+                        <h4 className="font-semibold" style={{ color: type.color }}>
+                          {type.name}
+                        </h4>
+                        <p className="text-2xl font-bold text-gray-900">{type.value}</p>
+                        <p className="text-sm text-gray-600">{((type.value / 1247) * 100).toFixed(1)}% of workforce</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-3">Employment Benefits</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h5 className="font-medium text-purple-800">Full-Time Benefits</h5>
+                        <ul className="text-sm text-gray-600 mt-1 space-y-1">
+                          <li>• Health Insurance</li>
+                          <li>• 401(k) Matching</li>
+                          <li>• Paid Time Off</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-cyan-800">Part-Time Benefits</h5>
+                        <ul className="text-sm text-gray-600 mt-1 space-y-1">
+                          <li>• Flexible Schedule</li>
+                          <li>• Pro-rated PTO</li>
+                          <li>• Training Access</li>
+                        </ul>
                       </div>
                     </div>
-                    <EmployeeComposition />
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
-          </Container>
+                  </div>
+                </div>
+              )}
+
+              {modalData?.type === "department" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div
+                      className="bg-gradient-to-r from-gray-50 to-gray-100 p-4 rounded-lg border-l-4"
+                      style={{ borderColor: modalData.data.color }}
+                    >
+                      <h4 className="font-semibold" style={{ color: modalData.data.color }}>
+                        Total Employees
+                      </h4>
+                      <p className="text-2xl font-bold text-gray-900">{modalData.data.count}</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg">
+                      <h4 className="font-semibold text-green-800">Avg Performance</h4>
+                      <p className="text-2xl font-bold text-green-900">
+                        {dashboardData.performanceMetrics.find((p) => p.department === modalData.data.name)
+                          ?.performance || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-3">Department Statistics</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex justify-between">
+                        <span>Senior Level</span>
+                        <span className="font-medium">{Math.floor(modalData.data.count * 0.3)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Mid Level</span>
+                        <span className="font-medium">{Math.floor(modalData.data.count * 0.5)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Junior Level</span>
+                        <span className="font-medium">{Math.floor(modalData.data.count * 0.2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Open Positions</span>
+                        <span className="font-medium">{Math.floor(modalData.data.count * 0.1)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {modalData?.type === "activity" && (
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                        <span className="text-white text-lg font-bold">
+                          {modalData.data.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="text-xl sm:text-2xl font-semibold text-blue-900">{modalData.data.name}</h4>
+                        <p className="text-blue-700">{modalData.data.action}</p>
+                        <p className="text-sm text-blue-600">{modalData.data.time}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-3">Activity Details</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span>Activity Type:</span>
+                        <span className="font-medium">{modalData.data.type}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Department:</span>
+                        <span className="font-medium">
+                          {modalData.data.type === "New Hire"
+                            ? "Marketing"
+                            : modalData.data.type === "Review"
+                              ? "Engineering"
+                              : "Sales"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Status:</span>
+                        <span className="font-medium text-green-600">Completed</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Priority:</span>
+                        <span className="font-medium text-orange-600">Normal</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(modalData?.type === "hiringTrends" ||
+                modalData?.type === "attendance" ||
+                modalData?.type === "performance") && (
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-indigo-50 to-indigo-100 p-4 rounded-lg">
+                    <h4 className="font-semibold text-indigo-800 mb-2">Analytics Summary</h4>
+                    <p className="text-indigo-700">
+                      {modalData?.type === "hiringTrends" &&
+                        "Monthly hiring shows positive growth with 67 new hires in June, exceeding targets by 15%."}
+                      {modalData?.type === "attendance" &&
+                        "Weekly attendance maintains excellent levels above 95%, with Week 4 showing peak performance at 96.1%."}
+                      {modalData?.type === "performance" &&
+                        "Department performance metrics show HR leading at 9.1/10, with all departments exceeding 8.5 benchmark."}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h5 className="font-medium mb-2">Key Insights</h5>
+                      <ul className="text-sm space-y-1">
+                        <li>• Consistent upward trend</li>
+                        <li>• Above industry average</li>
+                        <li>• Strong team performance</li>
+                      </ul>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h5 className="font-medium mb-2">Recommendations</h5>
+                      <ul className="text-sm space-y-1">
+                        <li>• Continue current strategies</li>
+                        <li>• Monitor seasonal patterns</li>
+                        <li>• Expand successful programs</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-// Main App Component
-function DashboardMain() {
-  useEffect(() => {
-    // Inject CSS styles
-    const styleSheet = document.createElement("style")
-    styleSheet.innerText = styles
-    document.head.appendChild(styleSheet)
-
-    return () => {
-      document.head.removeChild(styleSheet)
-    }
-  }, [])
-
-  return (
-    <div className="App">
-      <Dashboard />
-    </div>
-  )
-}
-
-export default DashboardMain
+export default Dashboard
