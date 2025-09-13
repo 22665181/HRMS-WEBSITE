@@ -62,7 +62,4 @@ CREATE TABLE IF NOT EXISTS events (
 
 
 
-### 1. Clone Repository
-```bash
-git clone https://github.com/<your-username>/hrms-backend.git
-cd hrms-backend
+
