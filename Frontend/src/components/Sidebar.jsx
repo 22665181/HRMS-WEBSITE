@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Link, useLocation } from "react-router-dom"
 import {
   FaHome,
   FaComments,
@@ -15,14 +16,14 @@ import {
 } from "react-icons/fa"
 
 const navItems = [
-  { key: "dashboard", label: "Dashboard", icon: <FaHome /> },
-  { key: "chat", label: "Chat", icon: <FaComments /> },
-  { key: "employees", label: "Employees", icon: <FaUsers /> },
-  { key: "feed", label: "Feed", icon: <FaBookOpen /> },
-  { key: "recognition", label: "Recognition", icon: <FaChartBar /> },
-  { key: "event", label: "Event", icon: <FaCalendarAlt /> },
-  { key: "profile", label: "Profile", icon: <FaUserCircle /> },
-  { key: "settings", label: "Settings", icon: <FaCog /> },
+  { key: "dashboard", label: "Dashboard", icon: <FaHome />, path: "/dashboard" },
+  { key: "chat", label: "Chat", icon: <FaComments />, path: "/chat" },
+  { key: "employees", label: "Employees", icon: <FaUsers />, path: "/employees" },
+  { key: "feed", label: "Feed", icon: <FaBookOpen />, path: "/feed" },
+  { key: "recognition", label: "Recognition", icon: <FaChartBar />, path: "/recognition" },
+  { key: "event", label: "Event", icon: <FaCalendarAlt />, path: "/event" },
+  { key: "profile", label: "Profile", icon: <FaUserCircle />, path: "/profile" },
+  { key: "settings", label: "Settings", icon: <FaCog />, path: "/settings" },
 ]
 
 const styles = `
@@ -147,17 +148,25 @@ function InjectStyles({ css }) {
   return <style>{css}</style>
 }
 
-const Sidebar = ({ activePage, setActivePage }) => {
+const Sidebar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const location = useLocation()
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
   }
 
-  const handleMenuClick = (key) => {
-    setActivePage(key)
+  const handleMenuClick = () => {
     setIsMobileMenuOpen(false)
   }
+
+  const getCurrentActivePage = () => {
+    const currentPath = location.pathname
+    const activeItem = navItems.find((item) => item.path === currentPath)
+    return activeItem ? activeItem.key : "dashboard"
+  }
+
+  const activePage = getCurrentActivePage()
 
   return (
     <>
@@ -257,12 +266,14 @@ const Sidebar = ({ activePage, setActivePage }) => {
         >
           {navItems.map((item) => (
             <li key={item.key} style={{ marginBottom: "0.5rem" }}>
-              <button
+              <Link
+                to={item.path}
                 className={`nav-link ${activePage === item.key ? "active" : ""}`}
-                onClick={() => handleMenuClick(item.key)}
+                onClick={handleMenuClick}
+                style={{ textDecoration: "none" }}
               >
                 <span style={{ marginRight: "0.5rem" }}>{item.icon}</span> {item.label}
-              </button>
+              </Link>
             </li>
           ))}
         </ul>

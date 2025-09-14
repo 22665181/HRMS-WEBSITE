@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Routes, Route, Navigate } from "react-router-dom"
 import { useMediaQuery } from "react-responsive"
 import { DarkModeProvider } from "./components/Recognition"
 import Sidebar from "./components/Sidebar"
@@ -13,39 +13,15 @@ import Events from "./components/Events"
 import Profile from "./components/Profile"
 import Settings from "./components/Settings"
 
-import "bootstrap/dist/css/bootstrap.min.css"
+// import "bootstrap/dist/css/bootstrap.min.css"
 
 function App() {
-  const [activePage, setActivePage] = useState("dashboard")
   const isMobile = useMediaQuery({ maxWidth: 768 })
-
-  const renderPage = () => {
-    switch (activePage) {
-      case "dashboard":
-        return <DashboardMain />
-      case "chat":
-        return <Chat />
-      case "feed":
-        return <Feed />
-      case "employees":
-        return <Employee />
-      case "recognition":
-        return <Recognition />
-      case "event":
-        return <Events />
-      case "profile":
-        return <Profile />
-      case "settings":
-        return <Settings />
-      default:
-        return <DashboardMain />
-    }
-  }
 
   return (
     <DarkModeProvider>
       <div className="d-flex h-100" style={{ minHeight: "100vh" }}>
-        <Sidebar activePage={activePage} setActivePage={setActivePage} />
+        <Sidebar />
         <div
           style={{
             width: "100%",
@@ -54,7 +30,17 @@ function App() {
             minWidth: isMobile ? "100%" : "calc(80% - 250px)",
           }}
         >
-          {renderPage()}
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<DashboardMain />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/feed" element={<Feed />} />
+            <Route path="/employees" element={<Employee />} />
+            <Route path="/recognition" element={<Recognition />} />
+            <Route path="/event" element={<Events />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
         </div>
       </div>
     </DarkModeProvider>

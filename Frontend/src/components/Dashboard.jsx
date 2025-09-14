@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react"
 import { useDarkMode } from "./Recognition"
-import { FaSearch, FaUserFriends, FaCheck, FaPlaneDeparture, FaRegChartBar, FaCog } from "react-icons/fa";
+import { useNavigate } from "react-router-dom"
+import { FaSearch, FaUserFriends, FaCheck, FaPlaneDeparture, FaRegChartBar, FaCog, FaSignOutAlt, FaUser } from "react-icons/fa";
 
 // import "../index.css"
 import {
@@ -24,11 +25,13 @@ import {
 
 const Dashboard = () => {
   const { isDarkMode } = useDarkMode()
+  const navigate = useNavigate()
   const [selectedTimeframe, setSelectedTimeframe] = useState("month")
   const [selectedDepartment, setSelectedDepartment] = useState("all")
   const [showModal, setShowModal] = useState(false)
   const [modalData, setModalData] = useState(null)
   const [hoveredCard, setHoveredCard] = useState(null)
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false)
 
   const baseData = {
     week: {
@@ -234,30 +237,82 @@ const Dashboard = () => {
                     : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
                 }`}
               />
-              <div
-                className={`absolute inset-y-0 left-3 flex items-center transition-colors duration-300 ${
-                  isDarkMode ? "text-gray-400" : "text-gray-400"
-                }`}
-              >
-                <FaSearch className="text-lg text-grey"/>
+              <div className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors duration-300 ${isDarkMode ? "text-gray-400" : "text-gray-400" }`} >
+                  <FaSearch />
               </div>
             </div>
             <button
+              onClick={() => navigate("/settings")}
               className={`p-2 transition-colors duration-200 ${
                 isDarkMode ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-800"
               }`}
             >
-            <FaCog className="text-2xl"/>
-
-
+              <FaCog className="text-2xl"/>
             </button>
-            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-200 cursor-pointer">
-              <span className="text-white text-sm font-medium">JD</span>
+            <div className="relative">
+              <div
+                className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-200 cursor-pointer"
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              >
+                <span className="text-white text-sm font-medium">JD</span>
+              </div>
+
+              {/* Profile Dropdown */}
+              {showProfileDropdown && (
+                <div
+                  className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg z-50 border transition-colors duration-300 ${
+                    isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+                  }`}
+                >
+                  {/* Current Profile Image */}
+                  <div className={`px-4 py-3 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                        <span className="text-white font-medium">JD</span>
+                      </div>
+                      <div>
+                        <p className={`font-medium ${isDarkMode ? "text-white" : "text-gray-900"}`}>John Doe</p>
+                        <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>HR Manager</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Menu Options */}
+                  <div className="py-1">
+                    <button
+                      onClick={() => {
+                        navigate("/Profile")
+                        setShowProfileDropdown(false)
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${
+                        isDarkMode
+                          ? "text-gray-300 hover:bg-gray-700 hover:text-white"
+                          : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                      }`}
+                    >
+                     <span className="inline-flex items-center gap-2"> <FaUser /> profile </span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigate("/login")
+                        setShowProfileDropdown(false)
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${
+                        isDarkMode
+                          ? "text-gray-300 hover:bg-gray-700 hover:text-white"
+                          : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                      }`}
+                    >
+                      <div className="border-t pb-2"></div>  
+                      <span className={`inline-flex items-center gap-2 ${ isDarkMode ? "text-red-400" : "text-red-600"} `}> <FaSignOutAlt /> Logout </span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </header> 
-    
 
       {/* Main Content */}
       <main className="p-4 sm:p-6">
@@ -297,7 +352,7 @@ const Dashboard = () => {
                   {dashboardData.kpis.totalEmployees.change} {dashboardData.kpis.totalEmployees.period}
                 </p>
               </div>
-              <div className="bg-white bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
+              <div className="bg-white/30 bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
                 <span className="text-xl sm:text-2xl"><FaUserFriends className={` ${isDarkMode ? "bg-gray-900 text-purple-500" : "text-purple-900"}`}/> </span>
               </div>
             </div>
@@ -319,7 +374,7 @@ const Dashboard = () => {
                   {dashboardData.kpis.activeToday.percentage} {dashboardData.kpis.activeToday.label}
                 </p>
               </div>
-              <div className="bg-white bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
+              <div className="bg-white/30 bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
                 <span className="text-xl sm:text-2xl"><FaCheck className={` ${isDarkMode ? "bg-gray-900 text-green-500" : "text-green-900"}`} /></span>
               </div>
             </div>
@@ -339,7 +394,7 @@ const Dashboard = () => {
                   {dashboardData.kpis.onLeave.percentage} {dashboardData.kpis.onLeave.label}
                 </p>
               </div>
-              <div className="bg-white bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
+              <div className="bg-white/30 bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
                 <span className="text-xl sm:text-2xl"><FaPlaneDeparture className={` ${isDarkMode ? "bg-gray-900 text-blue-500" : "text-blue-900"}`}/></span>
               </div>
             </div>
@@ -353,7 +408,7 @@ const Dashboard = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className={` text-xs sm:text-sm font-medium ${isDarkMode ? "text-red-400" : "text-red-600"}`}>Avg Performance</p>
+                <p className={` text-xs sm:text-sm font-medium ${isDarkMode ? "text-red-500" : "text-red-600"}`}>Avg Performance</p>
                 <p className={`text-2xl sm:text-3xl font-bold  ${isDarkMode ? "text-red-600" : "text-red-700"} `}>
                   {dashboardData.kpis.avgPerformance.value}
                 </p>
@@ -361,8 +416,8 @@ const Dashboard = () => {
                   {dashboardData.kpis.avgPerformance.change} {dashboardData.kpis.avgPerformance.period}
                 </p>
               </div>
-              <div className="bg-white bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
-                <span className="text-xl sm:text-2xl"><FaRegChartBar className={`${isDarkMode ? "bg-gray-900 text-red-700 " : "text-red-700 "}`}/></span>
+              <div className="bg-white/30 bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
+                <span className="text-xl sm:text-2xl"><FaRegChartBar className={`${isDarkMode ? "bg-gray-900 text-red-500 " : "text-red-700 "}`}/></span>
               </div>
             </div>
           </div>
@@ -1037,6 +1092,7 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+      {showProfileDropdown && <div className="fixed inset-0 z-40" onClick={() => setShowProfileDropdown(false)} />}
     </div>
   )
 }
