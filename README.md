@@ -2,7 +2,7 @@
 
 A simple and responsive HRMS (Human Resource Management System) web application to manage employee records, recognition, events, chat, and more — all in one place.
 
-🔗 **Live Preview**: [hrms-frontend](https://hrms-frontend-nine.vercel.app/)
+🔗 **Live Preview**: [hrms-frontend](https://hrms-frontend-nine.vercel.app/) 
 
 ## 🚀 Features
 - 📊 Dashboard overview  

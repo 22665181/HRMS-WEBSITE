@@ -1,76 +1,71 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { FaClock, FaCalendarAlt, FaVideo, FaGlobe } from "react-icons/fa";
-import '../App.css';
+"use client"
+
+import { useState, useEffect } from "react"
+import axios from "axios"
+import { FaClock, FaCalendarAlt, FaVideo, FaGlobe } from "react-icons/fa"
+import "../App.css"
+
+const API_BASE_URL = "http://localhost:5000"
 
 // Utility: dynamic avatar URL generation from organizer name or fallback
 const getAvatarUrl = (organizer) =>
-  `https://ui-avatars.com/api/?name=${encodeURIComponent(
-    organizer || "?"
-  )}&background=4c57c1&color=fff&size=64`;
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(organizer || "?")}&background=4c57c1&color=fff&size=64`
 
 export default function Events() {
-  const [currentStep, setCurrentStep] = useState("event1");
-  const [eventData, setEventData] = useState({});
-  const [showPopup, setShowPopup] = useState(false);
+  const [currentStep, setCurrentStep] = useState("event1")
+  const [eventData, setEventData] = useState({})
+  const [showPopup, setShowPopup] = useState(false)
 
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    fetchEvents()
+  }, [])
 
   // Fetch events from backend API
   const fetchEvents = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      const res = await axios.get("http://localhost:5000/api/events");
-      setEvents(res.data.data || []);
+      const res = await axios.get(`${API_BASE_URL}/api/events`)
+      setEvents(res.data.data || [])
     } catch {
-      setError("Failed to load events");
+      setError("Failed to load events")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Navigation handler between steps
   const navigateToStep = (step, data = {}) => {
     if (step === "event3") {
-      setEventData({ ...eventData, ...data });
-      setShowPopup(true);
+      setEventData({ ...eventData, ...data })
+      setShowPopup(true)
     } else {
-      setEventData({ ...eventData, ...data });
-      setCurrentStep(step);
+      setEventData({ ...eventData, ...data })
+      setCurrentStep(step)
     }
-  };
+  }
 
   // Close popup and refresh to event list
   const closePopup = () => {
-    setShowPopup(false);
-    setCurrentStep("event1");
-    setEventData({});
-    fetchEvents();
-  };
+    setShowPopup(false)
+    setCurrentStep("event1")
+    setEventData({})
+    fetchEvents()
+  }
 
   return (
     <div className="container py-5">
       {currentStep === "event1" && (
-        <Event1
-          onNavigate={navigateToStep}
-          events={events}
-          loading={loading}
-          error={error}
-        />
+        <Event1 onNavigate={navigateToStep} events={events} loading={loading} error={error} />
       )}
-      {currentStep === "event2" && (
-        <Event2 onNavigate={navigateToStep} fetchEvents={fetchEvents} />
-      )}
+      {currentStep === "event2" && <Event2 onNavigate={navigateToStep} fetchEvents={fetchEvents} />}
       {showPopup && <Event3Popup eventData={eventData} onClose={closePopup} />}
     </div>
-  );
+  )
 }
 
 /* ---------- EVENT LIST PAGE ---------- */
@@ -89,10 +84,7 @@ function Event1({ onNavigate, events, loading, error }) {
         Upcoming Events & Scheduling
       </h2>
 
-      <div
-        className="row g-0 shadow rounded overflow-hidden"
-        style={{ minHeight: "70vh" }}
-      >
+      <div className="row g-0 shadow rounded overflow-hidden" style={{ minHeight: "70vh" }}>
         {/* Left Panel - Create New Event Button */}
         <div
           className="col-lg-4 d-flex justify-content-center align-items-center"
@@ -104,10 +96,7 @@ function Event1({ onNavigate, events, loading, error }) {
             padding: "2rem",
           }}
         >
-          <h3
-            className="mb-4"
-            style={{ fontWeight: 700, letterSpacing: "1px", textAlign: "center" }}
-          >
+          <h3 className="mb-4" style={{ fontWeight: 700, letterSpacing: "1px", textAlign: "center" }}>
             Ready to create?
           </h3>
           <button
@@ -152,21 +141,13 @@ function Event1({ onNavigate, events, loading, error }) {
           )}
 
           {error && (
-            <div
-              className="alert alert-danger text-center"
-              role="alert"
-              style={{ fontWeight: "600" }}
-            >
+            <div className="alert alert-danger text-center" role="alert" style={{ fontWeight: "600" }}>
               {error}
             </div>
           )}
 
           {!loading && !error && events.length === 0 && (
-            <div
-              className="alert alert-info text-center fs-5"
-              role="alert"
-              style={{ fontWeight: "600" }}
-            >
+            <div className="alert alert-info text-center fs-5" role="alert" style={{ fontWeight: "600" }}>
               No events found. Create your first event!
             </div>
           )}
@@ -192,7 +173,7 @@ function Event1({ onNavigate, events, loading, error }) {
                   <div className="card-body d-flex flex-column">
                     <div className="d-flex align-items-center mb-3">
                       <img
-                        src={getAvatarUrl(event.organizer)}
+                        src={getAvatarUrl(event.organizer) || "/placeholder.svg"}
                         alt="Organizer Avatar"
                         className="me-3"
                         style={{
@@ -204,10 +185,7 @@ function Event1({ onNavigate, events, loading, error }) {
                         }}
                       />
                       <div>
-                        <p
-                          className="mb-1 text-muted fs-7"
-                          style={{ letterSpacing: "0.7px" }}
-                        >
+                        <p className="mb-1 text-muted fs-7" style={{ letterSpacing: "0.7px" }}>
                           {event.organizer || "No organizer specified"}
                         </p>
                         <h5
@@ -223,27 +201,14 @@ function Event1({ onNavigate, events, loading, error }) {
                       </div>
                     </div>
 
-                    <ul
-                      className="list-unstyled text-muted fs-7 mb-3"
-                      style={{ letterSpacing: "0.5px", flexGrow: 1 }}
-                    >
+                    <ul className="list-unstyled text-muted fs-7 mb-3" style={{ letterSpacing: "0.5px", flexGrow: 1 }}>
                       <li className="d-flex align-items-center mb-2">
-                        <FaClock
-                          className="me-2 text-primary"
-                          style={{ minWidth: 18, fontSize: 15 }}
-                        />
+                        <FaClock className="me-2 text-primary" style={{ minWidth: 18, fontSize: 15 }} />
                         <span>{event.duration ? `${event.duration} mins` : "No duration set"}</span>
                       </li>
                       <li className="d-flex align-items-center mb-2">
-                        <FaCalendarAlt
-                          className="me-2 text-primary"
-                          style={{ minWidth: 18, fontSize: 15 }}
-                        />
-                        <span>
-                          {event.date
-                            ? new Date(event.date).toLocaleString()
-                            : "No date set"}
-                        </span>
+                        <FaCalendarAlt className="me-2 text-primary" style={{ minWidth: 18, fontSize: 15 }} />
+                        <span>{event.date ? new Date(event.date).toLocaleString() : "No date set"}</span>
                       </li>
 
                       {/* Event Type */}
@@ -268,17 +233,12 @@ function Event1({ onNavigate, events, loading, error }) {
                       {(event.mode_of_event === "online" || event.mode_of_event === "hybrid") && (
                         <li className="d-flex align-items-center mb-2" style={{ wordBreak: "break-word" }}>
                           <FaVideo className="me-2 text-primary" style={{ minWidth: 18, fontSize: 15 }} />
-                          <span className="meeting-link-text">
-                            {event.meeting_link || "No meeting link set"}
-                          </span>
+                          <span className="meeting-link-text">{event.meeting_link || "No meeting link set"}</span>
                         </li>
                       )}
 
                       <li className="d-flex align-items-center">
-                        <FaGlobe
-                          className="me-2 text-primary"
-                          style={{ minWidth: 18, fontSize: 15 }}
-                        />
+                        <FaGlobe className="me-2 text-primary" style={{ minWidth: 18, fontSize: 15 }} />
                         <span>{event.timezone || "No timezone set"}</span>
                       </li>
                     </ul>
@@ -301,72 +261,66 @@ function Event1({ onNavigate, events, loading, error }) {
         </div>
       </div>
     </>
-  );
+  )
 }
 
 /* ---------- EVENT CREATION FORM ---------- */
 function Event2({ onNavigate, fetchEvents }) {
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [duration, setDuration] = useState("");
-  const [timezone, setTimezone] = useState("Asia/Kolkata");
-  const [modeOfEvent, setModeOfEvent] = useState("Online");
-  const [location, setLocation] = useState("");
-  const [meetingLink, setMeetingLink] = useState("");
-  const [organizer, setOrganizer] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [title, setTitle] = useState("")
+  const [date, setDate] = useState("")
+  const [startTime, setStartTime] = useState("")
+  const [duration, setDuration] = useState("")
+  const [timezone, setTimezone] = useState("Asia/Kolkata")
+  const [modeOfEvent, setModeOfEvent] = useState("Online")
+  const [location, setLocation] = useState("")
+  const [meetingLink, setMeetingLink] = useState("")
+  const [organizer, setOrganizer] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState("")
 
   // Converts the date and startTime inputs to ISO datetime string
   const getISODateTime = () => {
-    if (!date || !startTime) return "";
+    if (!date || !startTime) return ""
     try {
-      const dt = new Date(`${date}T${startTime}`);
-      if (isNaN(dt)) return "";
-      return dt.toISOString();
+      const dt = new Date(`${date}T${startTime}`)
+      if (isNaN(dt)) return ""
+      return dt.toISOString()
     } catch {
-      return "";
+      return ""
     }
-  };
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+    e.preventDefault()
+    setError("")
 
     // Validate required fields
     if (!title.trim() || !date || !startTime || !duration.trim() || !timezone) {
-      setError("Please fill in Title, Date, Start Time, Duration, and Timezone.");
-      return;
+      setError("Please fill in Title, Date, Start Time, Duration, and Timezone.")
+      return
     }
 
-    if (
-      (modeOfEvent === "Offline" || modeOfEvent === "Hybrid") &&
-      !location.trim()
-    ) {
-      setError("Location is required for Offline and Hybrid events.");
-      return;
+    if ((modeOfEvent === "Offline" || modeOfEvent === "Hybrid") && !location.trim()) {
+      setError("Location is required for Offline and Hybrid events.")
+      return
     }
 
-    if (
-      (modeOfEvent === "Online" || modeOfEvent === "Hybrid") &&
-      !meetingLink.trim()
-    ) {
-      setError("Meeting link is required for Online and Hybrid events.");
-      return;
+    if ((modeOfEvent === "Online" || modeOfEvent === "Hybrid") && !meetingLink.trim()) {
+      setError("Meeting link is required for Online and Hybrid events.")
+      return
     }
 
-    const numericDuration = parseInt(duration, 10);
+    const numericDuration = Number.parseInt(duration, 10)
     if (isNaN(numericDuration) || numericDuration <= 0) {
-      setError("Duration must be a positive number in minutes.");
-      return;
+      setError("Duration must be a positive number in minutes.")
+      return
     }
 
     // Always provide location to satisfy NOT NULL constraint, use placeholder if online-only
     const normalizedLocation =
       modeOfEvent === "Offline" || modeOfEvent === "Hybrid"
         ? location.trim()
-        : location.trim() || "Online event - virtual";
+        : location.trim() || "Online event - virtual"
 
     const newEvent = {
       title: title.trim(),
@@ -377,34 +331,31 @@ function Event2({ onNavigate, fetchEvents }) {
       mode_of_event: modeOfEvent.toLowerCase(), // normalize casing to lowercase
       organizer: organizer.trim() || null,
       location: normalizedLocation,
-      meeting_link:
-        modeOfEvent === "Online" || modeOfEvent === "Hybrid"
-          ? meetingLink.trim()
-          : "",
+      meeting_link: modeOfEvent === "Online" || modeOfEvent === "Hybrid" ? meetingLink.trim() : "",
       // Let backend assign created_at, so do not send it here
-    };
+    }
 
-    console.log("Submitting event data:", newEvent);
+    console.log("Submitting event data:", newEvent)
 
-    setSubmitting(true);
+    setSubmitting(true)
 
     try {
-      const res = await axios.post("http://localhost:5000/api/events", newEvent, {
+      const res = await axios.post(`${API_BASE_URL}/api/events`, newEvent, {
         headers: { "Content-Type": "application/json" },
-      });
+      })
       onNavigate("event3", {
         ...newEvent,
         id: res.data.data?.id || Date.now(),
-      });
-      fetchEvents();
+      })
+      fetchEvents()
     } catch (err) {
-      let msg = "Failed to create event.";
-      if (err.response?.data?.message) msg = err.response.data.message;
-      setError(msg);
+      let msg = "Failed to create event."
+      if (err.response?.data?.message) msg = err.response.data.message
+      setError(msg)
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   return (
     <div
@@ -416,19 +367,11 @@ function Event2({ onNavigate, fetchEvents }) {
       }}
     >
       <div className="container-fluid d-flex justify-content-center">
-        <div
-          className="card shadow-sm p-5"
-          style={{ maxWidth: 600, width: "100%", borderRadius: "12px" }}
-        >
-          <h4 className="mb-4 fw-bold text-primary letter-spacing-1">
-            Create New Event
-          </h4>
+        <div className="card shadow-sm p-5" style={{ maxWidth: 600, width: "100%", borderRadius: "12px" }}>
+          <h4 className="mb-4 fw-bold text-primary letter-spacing-1">Create New Event</h4>
 
           {error && (
-            <div
-              className="alert alert-danger shadow-sm fw-semibold"
-              style={{ fontSize: "0.9rem" }}
-            >
+            <div className="alert alert-danger shadow-sm fw-semibold" style={{ fontSize: "0.9rem" }}>
               {error}
             </div>
           )}
@@ -482,11 +425,7 @@ function Event2({ onNavigate, fetchEvents }) {
 
             <div className="mb-4">
               <label className="form-label fw-semibold">Timezone *</label>
-              <select
-                className="form-select shadow-sm"
-                value={timezone}
-                onChange={(e) => setTimezone(e.target.value)}
-              >
+              <select className="form-select shadow-sm" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
                 <option value="Asia/Kolkata">Asia/Kolkata</option>
                 <option value="Asia/Yerevan">Asia/Yerevan</option>
                 <option value="America/New_York">America/New_York</option>
@@ -575,12 +514,12 @@ function Event2({ onNavigate, fetchEvents }) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 /* ---------- EVENT SUCCESS POPUP ---------- */
 function Event3Popup({ eventData, onClose }) {
-  if (!eventData) return null;
+  if (!eventData) return null
 
   return (
     <div
@@ -602,17 +541,12 @@ function Event3Popup({ eventData, onClose }) {
           <h4 className="mb-0 text-dark" style={{ letterSpacing: "1px" }}>
             Event Created Successfully!
           </h4>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={onClose}
-            aria-label="Close"
-          />
+          <button type="button" className="btn-close" onClick={onClose} aria-label="Close" />
         </div>
 
         <div className="text-center mb-5">
           <img
-            src={getAvatarUrl(eventData.organizer)}
+            src={getAvatarUrl(eventData.organizer) || "/placeholder.svg"}
             alt="Organizer"
             className="rounded-circle mb-3"
             style={{
@@ -647,40 +581,28 @@ function Event3Popup({ eventData, onClose }) {
           <p className="mb-2">
             <strong>Type:</strong> {eventData.mode_of_event || "Unknown"}
           </p>
-          {(eventData.mode_of_event === "offline" ||
-            eventData.mode_of_event === "hybrid") && (
+          {(eventData.mode_of_event === "offline" || eventData.mode_of_event === "hybrid") && (
             <p className="mb-2 location-text" style={{ wordBreak: "break-word" }}>
               <FaVideo className="me-2 text-primary" />
               {eventData.location}
             </p>
           )}
-          {(eventData.mode_of_event === "online" ||
-            eventData.mode_of_event === "hybrid") &&
-            eventData.meeting_link && (
-              <p className="mb-0 meeting-link-text" style={{ wordBreak: "break-word" }}>
-                <FaVideo className="me-2 text-primary" />
-                <a
-                  href={eventData.meeting_link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "#4c57c1" }}
-                >
-                  {eventData.meeting_link}
-                </a>
-              </p>
-            )}
+          {(eventData.mode_of_event === "online" || eventData.mode_of_event === "hybrid") && eventData.meeting_link && (
+            <p className="mb-0 meeting-link-text" style={{ wordBreak: "break-word" }}>
+              <FaVideo className="me-2 text-primary" />
+              <a href={eventData.meeting_link} target="_blank" rel="noopener noreferrer" style={{ color: "#4c57c1" }}>
+                {eventData.meeting_link}
+              </a>
+            </p>
+          )}
         </div>
 
         <div className="text-center mt-5">
-          <button
-            className="btn btn-primary px-5 py-2 fw-semibold"
-            style={{ letterSpacing: "1px" }}
-            onClick={onClose}
-          >
+          <button className="btn btn-primary px-5 py-2 fw-semibold" style={{ letterSpacing: "1px" }} onClick={onClose}>
             Done
           </button>
         </div>
       </div>
     </div>
-  );
+  )
 }

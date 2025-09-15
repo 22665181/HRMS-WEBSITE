@@ -1,9 +1,21 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useDarkMode } from "./Recognition"
 import { useNavigate } from "react-router-dom"
-import { FaSearch, FaUserFriends, FaCheck, FaPlaneDeparture, FaRegChartBar, FaCog, FaSignOutAlt, FaUser } from "react-icons/fa";
+import {
+  FaSearch,
+  FaUserFriends,
+  FaCheck,
+  FaPlaneDeparture,
+  FaRegChartBar,
+  FaCog,
+  FaSignOutAlt,
+  FaUser,
+  FaCalendarAlt,
+  FaClock,
+} from "react-icons/fa"
+import axios from "axios"
 
 // import "../index.css"
 import {
@@ -33,6 +45,26 @@ const Dashboard = () => {
   const [hoveredCard, setHoveredCard] = useState(null)
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
 
+  const [events, setEvents] = useState([])
+  const [eventsLoading, setEventsLoading] = useState(false)
+
+  useEffect(() => {
+    fetchEvents()
+  }, [])
+
+  const fetchEvents = async () => {
+    setEventsLoading(true)
+    try {
+      const response = await axios.get("http://localhost:5000/api/events")
+      setEvents(response.data.data || [])
+    } catch (error) {
+      console.error("Failed to fetch events:", error)
+      setEvents([])
+    } finally {
+      setEventsLoading(false)
+    }
+  }
+
   const baseData = {
     week: {
       kpis: {
@@ -40,6 +72,11 @@ const Dashboard = () => {
         activeToday: { value: 1189, percentage: "95.3%", label: "attendance rate" },
         onLeave: { value: 58, percentage: "4.7%", label: "of workforce" },
         avgPerformance: { value: "8.7/10", change: "+0.1", period: "from last week" },
+        upcomingEvents: {
+          value: events.filter((event) => new Date(event.date) > new Date()).length,
+          change: "+3",
+          period: "this week",
+        },
       },
       monthlyHiring: [
         { month: "Mon", hires: 12, departures: 2 },
@@ -57,6 +94,11 @@ const Dashboard = () => {
         activeToday: { value: 1189, percentage: "95.3%", label: "attendance rate" },
         onLeave: { value: 58, percentage: "4.7%", label: "of workforce" },
         avgPerformance: { value: "8.7/10", change: "+0.3", period: "from last month" },
+        upcomingEvents: {
+          value: events.filter((event) => new Date(event.date) > new Date()).length,
+          change: "+8",
+          period: "this month",
+        },
       },
       monthlyHiring: [
         { month: "Jan", hires: 45, departures: 12 },
@@ -73,6 +115,11 @@ const Dashboard = () => {
         activeToday: { value: 1189, percentage: "95.3%", label: "attendance rate" },
         onLeave: { value: 58, percentage: "4.7%", label: "of workforce" },
         avgPerformance: { value: "8.7/10", change: "+0.5", period: "from last quarter" },
+        upcomingEvents: {
+          value: events.filter((event) => new Date(event.date) > new Date()).length,
+          change: "+15",
+          period: "this quarter",
+        },
       },
       monthlyHiring: [
         { month: "Q1", hires: 135, departures: 35 },
@@ -87,6 +134,11 @@ const Dashboard = () => {
         activeToday: { value: 1189, percentage: "95.3%", label: "attendance rate" },
         onLeave: { value: 58, percentage: "4.7%", label: "of workforce" },
         avgPerformance: { value: "8.7/10", change: "+0.8", period: "from last year" },
+        upcomingEvents: {
+          value: events.filter((event) => new Date(event.date) > new Date()).length,
+          change: "+32",
+          period: "this year",
+        },
       },
       monthlyHiring: [
         { month: "2020", hires: 456, departures: 123 },
@@ -100,6 +152,15 @@ const Dashboard = () => {
 
   const staticData = {
     recentActivities: [
+      ...events.slice(0, 2).map((event) => ({
+        id: `event-${event.id}`,
+        name: event.organizer || "Event Organizer",
+        action: `scheduled "${event.title}"`,
+        time: new Date(event.created_at || event.date).toLocaleDateString(),
+        type: "Event",
+        avatar: "/api/placeholder/40/40",
+        eventData: event,
+      })),
       {
         id: 1,
         name: "Sarah Anderson",
@@ -166,7 +227,7 @@ const Dashboard = () => {
       ...staticData,
       departments: filteredDepartments,
     }
-  }, [selectedTimeframe, selectedDepartment])
+  }, [selectedTimeframe, selectedDepartment, events])
 
   const handleKPIClick = (kpiType, data) => {
     setModalData({ type: kpiType, data })
@@ -400,7 +461,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div
+          {/* <div
             className={`bg-gradient-to-br from-[#FFE8D4] to-[#FFC9A7] rounded-xl p-4 sm:p-6 text-gray-800 shadow-lg cursor-pointer transform transition-all duration-300 ${hoveredCard === "performance" ? "scale-105 shadow-xl" : "hover:scale-105 hover:shadow-xl"}`}
             onMouseEnter={() => setHoveredCard("performance")}
             onMouseLeave={() => setHoveredCard(null)}
@@ -420,9 +481,32 @@ const Dashboard = () => {
                 <span className="text-xl sm:text-2xl"><FaRegChartBar className={`${isDarkMode ? "bg-gray-900 text-red-500 " : "text-red-700 "}`}/></span>
               </div>
             </div>
+          </div> */}
+          
+          <div
+            className={`bg-gradient-to-br from-[#E8F5E8] to-[#C8E6C9] rounded-xl p-4 sm:p-6 text-gray-800 shadow-lg cursor-pointer transform transition-all duration-300 ${hoveredCard === "events" ? "scale-105 shadow-xl" : "hover:scale-105 hover:shadow-xl"}`}
+            onMouseEnter={() => setHoveredCard("events")}
+            onMouseLeave={() => setHoveredCard(null)}
+            onClick={() => handleKPIClick("events", dashboardData.kpis.upcomingEvents)}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-green-400" : "text-green-700"}`}>Upcoming Events</p>
+                <p className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-green-500" : "text-green-900"}`}>
+                  {dashboardData.kpis.upcomingEvents.value}
+                </p>
+                <p className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-green-300" : "text-green-600"}`}>
+                  {dashboardData.kpis.upcomingEvents.change} {dashboardData.kpis.upcomingEvents.period}
+                </p>
+              </div>
+              <div className="bg-white/30 bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
+                <span className="text-xl sm:text-2xl"><FaCalendarAlt className={`${isDarkMode ? "bg-gray-900 text-green-500" : "text-green-900"}`}/></span>
+              </div>
+            </div>
           </div>
         </section>
 
+        {/* Charts Section */}
         <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Employee Types Pie Chart */}
           <div
@@ -580,6 +664,7 @@ const Dashboard = () => {
           </div>
         </section>
 
+        {/* Recent Activities Section */}
         <section className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
           <div
             className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
@@ -589,12 +674,11 @@ const Dashboard = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3
-                  className={`text-lg font-semibold flex items-center transition-colors duration-300 ${
+                  className={`text-lg font-semibold transition-colors duration-300 ${
                     isDarkMode ? "text-white" : "text-gray-800"
                   }`}
                 >
                   Recent Activities
-                  <span className="ml-2 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 </h3>
                 <p
                   className={`text-sm sm:text-base transition-colors duration-300 ${
@@ -617,27 +701,29 @@ const Dashboard = () => {
                         ? "bg-green-100 text-green-800 hover:bg-green-300"
                         : activity.type === "Review"
                           ? "bg-blue-100 text-blue-800 hover:bg-blue-300"
-                          : "bg-yellow-100 text-yellow-800 hover:bg-yellow-300"
+                          : activity.type === "Event"
+                            ? "bg-purple-100 text-purple-800 hover:bg-purple-300"
+                            : "bg-yellow-100 text-yellow-800 hover:bg-yellow-300"
                   }`}
                   onClick={() => handleChartClick(activity, "activity")}
                 >
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center hover:rotate-6 transition-transform duration-200">
-                    <span className="text-white text-sm font-medium">
-                      {activity.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </span>
+                    {activity.type === "Event" ? (
+                      <FaCalendarAlt className="text-white text-sm" />
+                    ) : (
+                      <span className="text-white text-sm font-medium">
+                        {activity.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </span>
+                    )}
                   </div>
                   <div className="flex-1">
-                    <div
-                      className={`text-sm transition-colors duration-300 `}
-                    >
+                    <div className="text-sm transition-colors duration-300">
                       <strong>{activity.name}</strong> {activity.action}
                     </div>
-                    <div
-                      className={`text-xs transition-colors duration-300  `}
-                    >
+                    <div className="text-xs transition-colors duration-300">
                       {activity.time}
                     </div>
                   </div>
@@ -647,7 +733,9 @@ const Dashboard = () => {
                         ? "bg-green-200 text-green-800 hover:bg-green-200"
                         : activity.type === "Review"
                           ? "bg-blue-200 text-blue-800 hover:bg-blue-200"
-                          : "bg-yellow-200 text-yellow-800 hover:bg-yellow-200"
+                          : activity.type === "Event"
+                            ? "bg-purple-200 text-purple-800 hover:bg-purple-200"
+                            : "bg-yellow-200 text-yellow-800 hover:bg-yellow-200"
                     }`}
                   >
                     {activity.type}
@@ -781,6 +869,76 @@ const Dashboard = () => {
             </div>
           </div>
         </section>
+
+        {/* Events Overview Chart */}
+        {/* <section className="grid grid-cols-1 lg:grid-cols-2 mt-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
+          <div
+            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
+              isDarkMode ? "bg-gray-800" : "bg-white"
+            }`}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3
+                className={`text-lg font-semibold transition-colors duration-300 ${
+                  isDarkMode ? "text-white" : "text-gray-800"
+                }`}
+              >
+                Recent Events
+              </h3>
+              <button
+                onClick={() => navigate('/events')}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
+              >
+                View All Events →
+              </button>
+            </div>
+            <div className="space-y-3">
+              {eventsLoading ? (
+                <div className="text-center p-4">
+                  <div className="spinner-border text-primary" role="status" />
+                  <p className="mt-2 text-muted">Loading events...</p>
+                </div>
+              ) : events.length === 0 ? (
+                <div className="text-center p-4">
+                  <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                    No events scheduled
+                  </p>
+                </div>
+              ) : (
+                events.slice(0, 3).map((event) => (
+                  <div
+                    key={event.id}
+                    className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 cursor-pointer hover:scale-[1.02] ${
+                      isDarkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-50 hover:bg-gray-100"
+                    }`}
+                    onClick={() => handleChartClick(event, "eventDetail")}
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                      <FaCalendarAlt className="text-white text-sm" />
+                    </div>
+                    <div className="flex-1">
+                      <div className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+                        {event.title}
+                      </div>
+                      <div className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        {new Date(event.date).toLocaleDateString()} • {event.organizer || "No organizer"}
+                      </div>
+                    </div>
+                    <div className={`text-xs px-2 py-1 rounded-full ${
+                      event.mode_of_event === "online" 
+                        ? "bg-blue-100 text-blue-800" 
+                        : event.mode_of_event === "offline"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-purple-100 text-purple-800"
+                    }`}>
+                      {event.mode_of_event || "online"}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </section> */}
       </main>
 
       {showModal && (
@@ -798,6 +956,8 @@ const Dashboard = () => {
               >
                 {modalData?.type === "employees" && "Employee Details"}
                 {modalData?.type === "active" && "Active Employees Today"}
+                {modalData?.type === "events" && "Upcoming Events Details"}
+                {modalData?.type === "eventDetail" && "Event Details"}
                 {modalData?.type === "leave" && "Employees on Leave"}
                 {modalData?.type === "performance" && "Performance Metrics"}
                 {modalData?.type === "employeeTypes" && "Employee Type Distribution"}
@@ -808,17 +968,85 @@ const Dashboard = () => {
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className={`text-2xl transition-colors duration-200 rounded-full w-8 h-8 flex items-center justify-center ${
-                  isDarkMode
-                    ? "text-gray-400 hover:text-gray-200 hover:bg-gray-700"
-                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                className={`text-2xl transition-colors duration-200 ${
+                  isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-800"
                 }`}
               >
                 ×
               </button>
             </div>
+            
+            {modalData?.type === "events" && (
+              <div className="space-y-4">
+                <p className={`text-lg ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                  Total upcoming events: <strong>{modalData.data.value}</strong>
+                </p>
+                <div className="grid gap-4">
+                  {events.filter(event => new Date(event.date) > new Date()).map(event => (
+                    <div key={event.id} className={`p-4 rounded-lg ${isDarkMode ? "bg-gray-700" : "bg-gray-50"}`}>
+                      <h4 className={`font-semibold ${isDarkMode ? "text-white" : "text-gray-800"}`}>{event.title}</h4>
+                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        {new Date(event.date).toLocaleDateString()} • {event.organizer || "No organizer"}
+                      </p>
+                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        Mode: {event.mode_of_event} • Duration: {event.duration} mins
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
-            <div className={`transition-colors duration-300 ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+            {modalData?.type === "eventDetail" && (
+              <div className="space-y-4">
+                <div className={`p-4 rounded-lg ${isDarkMode ? "bg-gray-700" : "bg-gray-50"}`}>
+                  <h4 className={`text-xl font-semibold mb-3 ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+                    {modalData.data.title}
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        <FaCalendarAlt className="inline mr-2" />
+                        Date: {new Date(modalData.data.date).toLocaleDateString()}
+                      </p>
+                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        <FaClock className="inline mr-2" />
+                        Duration: {modalData.data.duration} minutes
+                      </p>
+                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        Organizer: {modalData.data.organizer || "No organizer"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        Mode: {modalData.data.mode_of_event}
+                      </p>
+                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        Timezone: {modalData.data.timezone}
+                      </p>
+                      {modalData.data.location && (
+                        <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                          Location: {modalData.data.location}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {modalData.data.meeting_link && (
+                    <div className="mt-4">
+                      <a 
+                        href={modalData.data.meeting_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-sm"
+                      >
+                        Join Meeting →
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
               {modalData?.type === "employees" && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1089,10 +1317,13 @@ const Dashboard = () => {
                 </div>
               )}
             </div>
-          </div>
         </div>
-      )}
-      {showProfileDropdown && <div className="fixed inset-0 z-40" onClick={() => setShowProfileDropdown(false)} />}
+      )
+}
+
+{
+  showProfileDropdown && <div className="fixed inset-0 z-40" onClick={() => setShowProfileDropdown(false)} />
+}
     </div>
   )
 }

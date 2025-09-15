@@ -1,29 +1,58 @@
-// Backend/index.js
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import eventRoutes from './routes/eventRoutes.js';
-import errorHandler from './middleware/errorHandler.js';
-import './config/database.js'; // Initialize DB connection
+// Simple server startup file
+import express from "express"
+import cors from "cors"
+import dotenv from "dotenv"
 
-dotenv.config();
+// Load environment variables
+dotenv.config()
 
-const app = express();
+const app = express()
+const PORT = process.env.PORT || 5000
 
-app.use(cors());
-app.use(express.json());
+// Middleware
+// const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173'];
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  }),
+)
+app.use(express.json())
 
-app.use('/api/events', eventRoutes);
+// Test route
+app.get("/", (req, res) => {
+  res.json({ message: "HRMS Backend Server is running!" })
+})
 
-app.use((req, res) => {
-  res.status(404).json({ message: 'Not Found' });
-});
+// Basic events route for testing
+app.get("/api/events", (req, res) => {
+  res.json({
+    message: "Events endpoint working",
+    events: [],
+  })
+})
 
-// Centralized error handler middleware
-app.use(errorHandler);
+app.post("/api/events", (req, res) => {
+  console.log("Received event data:", req.body)
+  res.json({
+    message: "Event created successfully",
+    event: req.body,
+  })
+})
 
-const PORT = process.env.PORT || 5001;
+// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📅 Events API: http://localhost:${PORT}/api/events`);
-});
+  console.log(`🚀 HRMS Backend Server running on http://localhost:${PORT}`)
+  console.log(`📅 Events API: http://localhost:${PORT}/api/events`)
+  console.log(`🌐 Frontend should connect to: http://localhost:${PORT}`)
+})
+
+// Handle server errors
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err)
+})
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection:", err)
+})
