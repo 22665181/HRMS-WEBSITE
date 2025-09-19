@@ -96,8 +96,8 @@ const Dashboard = () => {
         avgPerformance: { value: "8.7/10", change: "+0.3", period: "from last month" },
         upcomingEvents: {
           value: events.filter((event) => new Date(event.date) > new Date()).length,
-          change: "+8",
-          period: "this month",
+          change: "+3",
+          period: "this week",
         },
       },
       monthlyHiring: [
@@ -152,39 +152,21 @@ const Dashboard = () => {
 
   const staticData = {
     recentActivities: [
-      ...events.slice(0, 2).map((event) => ({
-        id: `event-${event.id}`,
-        name: event.organizer || "Event Organizer",
-        action: `scheduled "${event.title}"`,
-        time: new Date(event.created_at || event.date).toLocaleDateString(),
-        type: "Event",
-        avatar: "/api/placeholder/40/40",
-        eventData: event,
-      })),
-      {
-        id: 1,
-        name: "Sarah Anderson",
-        action: "joined the Marketing team",
-        time: "2 hours ago",
-        type: "New Hire",
-        avatar: "/api/placeholder/40/40",
-      },
-      {
-        id: 2,
-        name: "Michael Johnson",
-        action: "completed performance review",
-        time: "4 hours ago",
-        type: "Review",
-        avatar: "/api/placeholder/40/40",
-      },
-      {
-        id: 3,
-        name: "Emily Wilson",
-        action: "requested vacation leave",
-        time: "6 hours ago",
-        type: "Leave Request",
-        avatar: "/api/placeholder/40/40",
-      },
+  ...events
+    .filter((event) => {
+      const eventDate = new Date(event.date);
+      return !isNaN(eventDate) && eventDate > new Date();
+    })
+    .slice(0, 3)
+    .map((event) => ({
+      id: `event-${event.id}`,
+      name: event.organizer || "Event Organizer",
+      action: `scheduled "${event.title}"`,
+      time: new Date(event.date).toLocaleDateString(),
+      type: "Event",
+      avatar: "/api/placeholder/40/40",
+      eventData: event,
+    })),
     ],
     departments: [
       { name: "Health", count: 342, color: "#ef4444ff" },
@@ -484,23 +466,23 @@ const Dashboard = () => {
           </div> */}
           
           <div
-            className={`bg-gradient-to-br from-[#E8F5E8] to-[#C8E6C9] rounded-xl p-4 sm:p-6 text-gray-800 shadow-lg cursor-pointer transform transition-all duration-300 ${hoveredCard === "events" ? "scale-105 shadow-xl" : "hover:scale-105 hover:shadow-xl"}`}
+            className={`bg-gradient-to-br from-[#FFE8D4] to-[#FFC9A7] rounded-xl p-4 sm:p-6 text-gray-800 shadow-lg cursor-pointer transform transition-all duration-300 ${hoveredCard === "events" ? "scale-105 shadow-xl" : "hover:scale-105 hover:shadow-xl"}`}
             onMouseEnter={() => setHoveredCard("events")}
             onMouseLeave={() => setHoveredCard(null)}
             onClick={() => handleKPIClick("events", dashboardData.kpis.upcomingEvents)}
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-green-400" : "text-green-700"}`}>Upcoming Events</p>
-                <p className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-green-500" : "text-green-900"}`}>
+                <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-red-400" : "text-red-700"}`}>Upcoming Events</p>
+                <p className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-red-500" : "text-red-900"}`}>
                   {dashboardData.kpis.upcomingEvents.value}
                 </p>
-                <p className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-green-300" : "text-green-600"}`}>
+                <p className={`text-xs sm:text-sm mt-1 ${isDarkMode ? "text-red-300" : "text-red-600"}`}>
                   {dashboardData.kpis.upcomingEvents.change} {dashboardData.kpis.upcomingEvents.period}
                 </p>
               </div>
               <div className="bg-white/30 bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
-                <span className="text-xl sm:text-2xl"><FaCalendarAlt className={`${isDarkMode ? "bg-gray-900 text-green-500" : "text-green-900"}`}/></span>
+                <span className="text-xl sm:text-2xl"><FaCalendarAlt className={`${isDarkMode ? "bg-gray-900 text-red-500" : "text-red-900"}`}/></span>
               </div>
             </div>
           </div>
@@ -871,7 +853,7 @@ const Dashboard = () => {
         </section>
 
         {/* Events Overview Chart */}
-        {/* <section className="grid grid-cols-1 lg:grid-cols-2 mt-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
+        {/* <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
           <div
             className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
               isDarkMode ? "bg-gray-800" : "bg-white"
@@ -1324,7 +1306,7 @@ const Dashboard = () => {
 {
   showProfileDropdown && <div className="fixed inset-0 z-40" onClick={() => setShowProfileDropdown(false)} />
 }
-    </div>
+</div>
   )
 }
 
