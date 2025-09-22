@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300..900&family=Londrina+Sketch&family=Montserrat:wght@100..900&family=Poppins:wght@700&family=Roboto:wght@100..900&family=Silkscreen:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300..900&family=Londrina+Sketch&family=Montserrat:wght@100..900&family=Poppins:wght@700&family=Roboto:wght@100..900&family=Silkscreen:wght@400;700&display=swap");
 
 /* ===== Global Variables & Typography ===== */
 :root {
@@ -14,6 +14,10 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --font-main: "Inter", "Montserrat", "Roboto", sans-serif;
+  --font-heading: "Poppins", sans-serif;
+  --font-logo: "Silkscreen", cursive;
 }
 
 a {
@@ -31,6 +35,10 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  font-family: var(--font-main);
+  background-color: #f9f9f9;
+  color: #212529;
+  line-height: 1.6;
 }
 
 h1 {
@@ -146,31 +154,23 @@ button:focus-visible {
     transform: rotate(360deg);
   }
 }
-/*=======*/
 
-/* === Font Variables === */
-:root {
-  --font-main: 'Inter', 'Montserrat', 'Roboto', sans-serif;
-  --font-heading: 'Poppins', sans-serif;
-  --font-logo: 'Silkscreen', cursive;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* === Base Reset === */
-body {
-  font-family: var(--font-main);
-  margin: 0;
-  padding: 0;
-  background-color: #f9f9f9;
-  color: #212529;
-  line-height: 1.6;
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
-#root {
-  display: flex;
-  height: 100vh;
-}
-
-/* === Sidebar === */
+/* ===== Sidebar ===== */
 .sidebar {
   width: 250px;
   background-color: #8481e2;
@@ -245,7 +245,7 @@ body {
   background-color: #9996ea;
 }
 
-/* === Active Nav Item === */
+/* ===== Active Nav Item ===== */
 .nav-item.active {
   background-color: #e3e2f3;
   border-left: 4px solid #5d5bd7;
@@ -261,7 +261,7 @@ body {
   color: black;
 }
 
-/* === Event Page New Styling === */
+/* ===== Event Page New Styling ===== */
 
 .event-wrapper {
   width: 100%;
@@ -286,7 +286,6 @@ body {
   box-sizing: border-box;
 }
 
-
 .event-header {
   text-align: center;
   padding: 1rem 2rem;
@@ -298,7 +297,6 @@ body {
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 1rem;
-
 }
 
 .event-heading {
@@ -342,11 +340,31 @@ body {
   color: black;
 }
 
+.event-card-hover {
+  transition: all 0.2s ease;
+}
+
+.event-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Gradient button styles for show more functionality */
+.gradient-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transition: all 0.3s ease;
+}
+
+.gradient-button:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: scale(1.05);
+}
+
 /* css only for calendar */
 
 .react-calendar {
   border: none !important;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", sans-serif;
   width: 100% !important;
 }
 
@@ -394,4 +412,8 @@ body {
 .react-calendar_month-viewdays_day--weekend {
   color: red !important;
 }
-/*++++this is event css++++*/
+
+#root {
+  display: flex;
+  height: 100vh;
+}

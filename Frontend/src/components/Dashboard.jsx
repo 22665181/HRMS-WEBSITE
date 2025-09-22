@@ -8,12 +8,18 @@ import {
   FaUserFriends,
   FaCheck,
   FaPlaneDeparture,
-  FaRegChartBar,
   FaCog,
   FaSignOutAlt,
   FaUser,
   FaCalendarAlt,
   FaClock,
+  FaAward,
+  FaUsers,
+  FaCalendarTimes,
+  FaUserPlus,
+  FaGlobe,
+  FaMapMarkerAlt,
+  FaExternalLinkAlt,
 } from "react-icons/fa"
 import axios from "axios"
 
@@ -47,6 +53,7 @@ const Dashboard = () => {
 
   const [events, setEvents] = useState([])
   const [eventsLoading, setEventsLoading] = useState(false)
+  const [showAllEvents, setShowAllEvents] = useState(false)
 
   useEffect(() => {
     fetchEvents()
@@ -152,21 +159,22 @@ const Dashboard = () => {
 
   const staticData = {
     recentActivities: [
-  ...events
-    .filter((event) => {
-      const eventDate = new Date(event.date);
-      return !isNaN(eventDate) && eventDate > new Date();
-    })
-    .slice(0, 3)
-    .map((event) => ({
-      id: `event-${event.id}`,
-      name: event.organizer || "Event Organizer",
-      action: `scheduled "${event.title}"`,
-      time: new Date(event.date).toLocaleDateString(),
-      type: "Event",
-      avatar: "/api/placeholder/40/40",
-      eventData: event,
-    })),
+      ...events
+        .filter((event) => {
+          const eventDate = new Date(event.date)
+          return !isNaN(eventDate) && eventDate > new Date()
+        })
+        .slice(0, 3)
+        .map((event) => ({
+          id: `event-${event.id}`,
+          name: event.organizer || "Event Organizer",
+          action: `scheduled "${event.title}"`,
+          time: new Date(event.date).toLocaleDateString(),
+          type: "Event",
+          avatar: "/api/placeholder/40/40",
+          eventData: event,
+        })),
+
     ],
     departments: [
       { name: "Health", count: 342, color: "#ef4444ff" },
@@ -212,7 +220,13 @@ const Dashboard = () => {
   }, [selectedTimeframe, selectedDepartment, events])
 
   const handleKPIClick = (kpiType, data) => {
-    setModalData({ type: kpiType, data })
+    if (kpiType === "events") {
+      // Pass the actual upcoming events array instead of just the KPI object
+      const upcomingEvents = events.filter((event) => new Date(event.date) > new Date())
+      setModalData({ type: kpiType, data: upcomingEvents })
+    } else {
+      setModalData({ type: kpiType, data })
+    }
     setShowModal(true)
   }
 
@@ -243,16 +257,14 @@ const Dashboard = () => {
     <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}>
       {/* Header */}
       <header
-        className={`shadow-sm border-b transition-colors duration-300 px-4 sm:px-6 py-4 ${
-          isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-        }`}
+        className={`shadow-sm border-b transition-colors duration-300 px-4 sm:px-6 py-4 ${isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+          }`}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <h1
-              className={`text-xl sm:text-2xl font-bold transition-colors duration-300 ${
-                isDarkMode ? "text-white" : "text-gray-800"
-              }`}
+              className={`text-xl sm:text-2xl font-bold transition-colors duration-300 ${isDarkMode ? "text-white" : "text-gray-800"
+                }`}
             >
               HR Portal
             </h1>
@@ -261,9 +273,8 @@ const Dashboard = () => {
             <select
               value={selectedTimeframe}
               onChange={(e) => setSelectedTimeframe(e.target.value)}
-              className={`px-2 sm:px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-colors duration-300 ${
-                isDarkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"
-              }`}
+              className={`px-2 sm:px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-colors duration-300 ${isDarkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"
+                }`}
             >
               <option value="week">This Week</option>
               <option value="month">This Month</option>
@@ -274,23 +285,23 @@ const Dashboard = () => {
               <input
                 type="text"
                 placeholder="Search employees..."
-                className={`pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-48 lg:w-64 ${
-                  isDarkMode
+                className={`pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-48 lg:w-64 ${isDarkMode
                     ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
                     : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                }`}
+                  }`}
               />
-              <div className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors duration-300 ${isDarkMode ? "text-gray-400" : "text-gray-400" }`} >
-                  <FaSearch />
+              <div
+                className={`absolute left-3 top-1/2 transform -translate-y-1/2 transition-colors duration-300 ${isDarkMode ? "text-gray-400" : "text-gray-400"}`}
+              >
+                <FaSearch />
               </div>
             </div>
             <button
               onClick={() => navigate("/settings")}
-              className={`p-2 transition-colors duration-200 ${
-                isDarkMode ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-800"
-              }`}
+              className={`p-2 transition-colors duration-200 ${isDarkMode ? "text-gray-300 hover:text-white" : "text-gray-600 hover:text-gray-800"
+                }`}
             >
-              <FaCog className="text-2xl"/>
+              <FaCog className="text-2xl" />
             </button>
             <div className="relative">
               <div
@@ -303,9 +314,8 @@ const Dashboard = () => {
               {/* Profile Dropdown */}
               {showProfileDropdown && (
                 <div
-                  className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg z-50 border transition-colors duration-300 ${
-                    isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
-                  }`}
+                  className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg z-50 border transition-colors duration-300 ${isDarkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+                    }`}
                 >
                   {/* Current Profile Image */}
                   <div className={`px-4 py-3 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}>
@@ -327,27 +337,33 @@ const Dashboard = () => {
                         navigate("/Profile")
                         setShowProfileDropdown(false)
                       }}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${
-                        isDarkMode
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${isDarkMode
                           ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                           : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
+                        }`}
                     >
-                     <span className="inline-flex items-center gap-2"> <FaUser /> profile </span>
+                      <span className="inline-flex items-center gap-2">
+                        {" "}
+                        <FaUser /> profile{" "}
+                      </span>
                     </button>
                     <button
                       onClick={() => {
                         navigate("/login")
                         setShowProfileDropdown(false)
                       }}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${
-                        isDarkMode
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${isDarkMode
                           ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                           : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
+                        }`}
                     >
-                      <div className="border-t pb-2"></div>  
-                      <span className={`inline-flex items-center gap-2 ${ isDarkMode ? "text-red-400" : "text-red-600"} `}> <FaSignOutAlt /> Logout </span>
+                      <div className="border-t pb-2"></div>
+                      <span
+                        className={`inline-flex items-center gap-2 ${isDarkMode ? "text-red-400" : "text-red-600"} `}
+                      >
+                        {" "}
+                        <FaSignOutAlt /> Logout{" "}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -355,23 +371,21 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </header> 
+      </header>
 
       {/* Main Content */}
       <main className="p-4 sm:p-6">
         {/* Welcome Section */}
         <section className="mb-6 sm:mb-8">
           <h2
-            className={`text-2xl sm:text-3xl font-bold mb-2 transition-colors duration-300 ${
-              isDarkMode ? "text-white" : "text-gray-900"
-            }`}
+            className={`text-2xl sm:text-3xl font-bold mb-2 transition-colors duration-300 ${isDarkMode ? "text-white" : "text-gray-900"
+              }`}
           >
             Dashboard Overview
           </h2>
           <p
-            className={`text-sm sm:text-base transition-colors duration-300 ${
-              isDarkMode ? "text-gray-300" : "text-gray-600"
-            }`}
+            className={`text-sm sm:text-base transition-colors duration-300 ${isDarkMode ? "text-gray-300" : "text-gray-600"
+              }`}
           >
             Welcome back! Here's what's happening with your team today.
           </p>
@@ -387,7 +401,9 @@ const Dashboard = () => {
           >
             <div className={"flex items-center justify-between"}>
               <div>
-                <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-400" : "text-purple-700"}`}>Total Employees</p>
+                <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-purple-400" : "text-purple-700"}`}>
+                  Total Employees
+                </p>
                 <p className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-purple-500" : "text-purple-900"}`}>
                   {dashboardData.kpis.totalEmployees.value.toLocaleString()}
                 </p>
@@ -396,7 +412,11 @@ const Dashboard = () => {
                 </p>
               </div>
               <div className="bg-white/30 bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
-                <span className="text-xl sm:text-2xl"><FaUserFriends className={` ${isDarkMode ? "bg-gray-900 text-purple-500" : "text-purple-900"}`}/> </span>
+                <span className="text-xl sm:text-2xl">
+                  <FaUserFriends
+                    className={` ${isDarkMode ? "bg-gray-900 text-purple-500" : "text-purple-900"}`}
+                  />{" "}
+                </span>
               </div>
             </div>
           </div>
@@ -409,7 +429,9 @@ const Dashboard = () => {
           >
             <div className="flex items-center justify-between ">
               <div>
-                <p className={` text-xs sm:text-sm font-medium ${isDarkMode ? "text-green-400" : "text-green-700"}`}>Active Today</p>
+                <p className={` text-xs sm:text-sm font-medium ${isDarkMode ? "text-green-400" : "text-green-700"}`}>
+                  Active Today
+                </p>
                 <p className={`text-2xl sm:text-3xl font-bold  ${isDarkMode ? "text-green-500" : "text-green-900"}`}>
                   {dashboardData.kpis.activeToday.value.toLocaleString()}
                 </p>
@@ -418,7 +440,9 @@ const Dashboard = () => {
                 </p>
               </div>
               <div className="bg-white/30 bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
-                <span className="text-xl sm:text-2xl"><FaCheck className={` ${isDarkMode ? "bg-gray-900 text-green-500" : "text-green-900"}`} /></span>
+                <span className="text-xl sm:text-2xl">
+                  <FaCheck className={` ${isDarkMode ? "bg-gray-900 text-green-500" : "text-green-900"}`} />
+                </span>
               </div>
             </div>
           </div>
@@ -431,14 +455,20 @@ const Dashboard = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-blue-400 " : "text-blue-700 "}`}>On Leave</p>
-                <p className={`text-2xl sm:text-3xl font-bold  ${isDarkMode ? "text-blue-500" : "text-blue-900"}`}>{dashboardData.kpis.onLeave.value}</p>
+                <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-blue-400 " : "text-blue-700 "}`}>
+                  On Leave
+                </p>
+                <p className={`text-2xl sm:text-3xl font-bold  ${isDarkMode ? "text-blue-500" : "text-blue-900"}`}>
+                  {dashboardData.kpis.onLeave.value}
+                </p>
                 <p className={` text-xs sm:text-sm mt-1 ${isDarkMode ? "text-blue-300" : "text-blue-600"}`}>
                   {dashboardData.kpis.onLeave.percentage} {dashboardData.kpis.onLeave.label}
                 </p>
               </div>
               <div className="bg-white/30 bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
-                <span className="text-xl sm:text-2xl"><FaPlaneDeparture className={` ${isDarkMode ? "bg-gray-900 text-blue-500" : "text-blue-900"}`}/></span>
+                <span className="text-xl sm:text-2xl">
+                  <FaPlaneDeparture className={` ${isDarkMode ? "bg-gray-900 text-blue-500" : "text-blue-900"}`} />
+                </span>
               </div>
             </div>
           </div>
@@ -464,7 +494,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div> */}
-          
+
           <div
             className={`bg-gradient-to-br from-[#FFE8D4] to-[#FFC9A7] rounded-xl p-4 sm:p-6 text-gray-800 shadow-lg cursor-pointer transform transition-all duration-300 ${hoveredCard === "events" ? "scale-105 shadow-xl" : "hover:scale-105 hover:shadow-xl"}`}
             onMouseEnter={() => setHoveredCard("events")}
@@ -473,7 +503,10 @@ const Dashboard = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-red-400" : "text-red-700"}`}>Upcoming Events</p>
+                <p className={`text-xs sm:text-sm font-medium ${isDarkMode ? "text-red-400" : "text-red-700"}`}>
+                  Upcoming Events
+                </p>
+
                 <p className={`text-2xl sm:text-3xl font-bold ${isDarkMode ? "text-red-500" : "text-red-900"}`}>
                   {dashboardData.kpis.upcomingEvents.value}
                 </p>
@@ -482,7 +515,11 @@ const Dashboard = () => {
                 </p>
               </div>
               <div className="bg-white/30 bg-opacity-30 rounded-lg sm: transition-transform duration-200 hover:rotate-12">
-                <span className="text-xl sm:text-2xl"><FaCalendarAlt className={`${isDarkMode ? "bg-gray-900 text-red-500" : "text-red-900"}`}/></span>
+
+                <span className="text-xl sm:text-2xl">
+                  <FaCalendarAlt className={`${isDarkMode ? "bg-gray-900 text-red-500" : "text-red-900"}`} />
+                </span>
+
               </div>
             </div>
           </div>
@@ -492,15 +529,13 @@ const Dashboard = () => {
         <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Employee Types Pie Chart */}
           <div
-            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
-              isDarkMode ? "bg-gray-800" : "bg-white"
-            }`}
+            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${isDarkMode ? "bg-gray-800" : "bg-white"
+              }`}
           >
             <div className="flex items-center justify-between mb-4">
               <h3
-                className={`text-lg font-semibold transition-colors duration-300 ${
-                  isDarkMode ? "text-white" : "text-gray-800"
-                }`}
+                className={`text-lg font-semibold transition-colors duration-300 ${isDarkMode ? "text-white" : "text-gray-800"
+                  }`}
               >
                 Employee Types
               </h3>
@@ -554,15 +589,13 @@ const Dashboard = () => {
 
           {/* Monthly Hiring Trends - now updates based on timeframe */}
           <div
-            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
-              isDarkMode ? "bg-gray-800" : "bg-white"
-            }`}
+            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${isDarkMode ? "bg-gray-800" : "bg-white"
+              }`}
           >
             <div className="flex items-center justify-between mb-4">
               <h3
-                className={`text-lg font-semibold transition-colors duration-300 ${
-                  isDarkMode ? "text-white" : "text-gray-800"
-                }`}
+                className={`text-lg font-semibold transition-colors duration-300 ${isDarkMode ? "text-white" : "text-gray-800"
+                  }`}
               >
                 {selectedTimeframe === "week"
                   ? "Daily"
@@ -609,15 +642,13 @@ const Dashboard = () => {
           </div>
 
           <div
-            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
-              isDarkMode ? "bg-gray-800" : "bg-white"
-            }`}
+            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${isDarkMode ? "bg-gray-800" : "bg-white"
+              }`}
           >
             <div className="flex items-center justify-between mb-4">
               <h3
-                className={`text-lg font-semibold transition-colors duration-300 ${
-                  isDarkMode ? "text-white" : "text-gray-800"
-                }`}
+                className={`text-lg font-semibold transition-colors duration-300 ${isDarkMode ? "text-white" : "text-gray-800"
+                  }`}
               >
                 Performance by Department
               </h3>
@@ -649,105 +680,262 @@ const Dashboard = () => {
         {/* Recent Activities Section */}
         <section className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
           <div
-            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
-              isDarkMode ? "bg-gray-800" : "bg-white"
-            }`}
+            className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${isDarkMode ? "bg-gray-800" : "bg-white"
+              }`}
           >
-            <div className="flex items-center justify-between mb-6">
+            <div className="space-y-6">
+              {/* Upcoming Events Section */}
               <div>
-                <h3
-                  className={`text-lg font-semibold transition-colors duration-300 ${
-                    isDarkMode ? "text-white" : "text-gray-800"
-                  }`}
-                >
-                  Recent Activities
-                </h3>
-                <p
-                  className={`text-sm sm:text-base transition-colors duration-300 ${
-                    isDarkMode ? "text-gray-300" : "text-gray-600"
-                  }`}
-                >
-                  Latest updates from your HR system
-                </p>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3
+                      className={`text-lg font-semibold transition-colors duration-300 ${isDarkMode ? "text-white" : "text-gray-800"
+                        }`}
+                    >
+                      Upcoming Events
+                    </h3>
+                    <p
+                      className={`text-sm transition-colors duration-300 ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                        }`}
+                    >
+                      {showAllEvents ? "All upcoming events" : "Next 3 meetings and events"}
+                    </p>
+                  </div>
+                  {(() => {
+                    const upcomingEventsCount = events.filter((event) => new Date(event.date) > new Date()).length
+                    return (
+                      upcomingEventsCount > 3 && (
+                        <div className="flex items-center space-x-2">
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full ${isDarkMode ? "bg-blue-600 text-blue-100" : "bg-blue-100 text-blue-800"
+                              }`}
+                          >
+                            {upcomingEventsCount} total
+                          </span>
+                          <button
+                            onClick={() => setShowAllEvents(!showAllEvents)}
+                            className={`text-xs px-3 py-1 rounded-full transition-all duration-200 hover:scale-105 ${isDarkMode
+                                ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                                : "bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600"
+                              }`}
+                          >
+                            {showAllEvents ? "Show Less" : "Show More"}
+                          </button>
+                        </div>
+                      )
+                    )
+                  })()}
+                </div>
+                <div className="space-y-3">
+                  {eventsLoading ? (
+                    <div className="text-center p-4">
+                      <div className="spinner-border text-primary" role="status" />
+                      <p className="mt-2 text-muted">Loading events...</p>
+                    </div>
+                  ) : events.length === 0 ? (
+                    <div className="text-center p-4">
+                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        No upcoming events scheduled
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {events
+                        .filter((event) => new Date(event.date) > new Date())
+                        .slice(0, showAllEvents ? undefined : 3)
+                        .map((event, index) => (
+                          <div
+                            key={event.id}
+                            className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 cursor-pointer hover:scale-[1.02] transform ${isDarkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-blue-50 hover:bg-blue-100"
+                              } ${showAllEvents && index >= 3 ? "animate-fadeIn" : ""}`}
+                            onClick={() => handleChartClick(event, "eventDetail")}
+                            style={{
+                              animationDelay: showAllEvents && index >= 3 ? `${(index - 3) * 100}ms` : "0ms",
+                            }}
+                          >
+                            <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                              <FaCalendarAlt className="text-white text-sm" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className={`font-medium text-sm ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+                                {event.title}
+                              </h4>
+                              <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                                {new Date(event.date).toLocaleDateString()} at {event.time}
+                              </p>
+                              {showAllEvents && event.location && (
+                                <p className={`text-xs ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
+                                  📍 {event.location}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex flex-col items-end space-y-1">
+                              <div
+                                className={`text-xs px-2 py-1 rounded-full ${event.type === "meeting"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-purple-100 text-purple-800"
+                                  }`}
+                              >
+                                {event.type}
+                              </div>
+                              {showAllEvents && event.priority && (
+                                <div
+                                  className={`text-xs px-2 py-1 rounded-full ${event.priority === "high"
+                                      ? "bg-red-100 text-red-800"
+                                      : event.priority === "medium"
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : "bg-gray-100 text-gray-800"
+                                    }`}
+                                >
+                                  {event.priority}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+
+                      {showAllEvents && events.filter((event) => new Date(event.date) > new Date()).length > 3 && (
+                        <div
+                          className={`mt-4 p-3 rounded-lg border-2 border-dashed transition-colors duration-300 ${isDarkMode ? "border-gray-600 bg-gray-800/50" : "border-gray-300 bg-gray-50/50"
+                            }`}
+                        >
+                          <div className="flex items-center justify-between text-xs">
+                            <span className={isDarkMode ? "text-gray-400" : "text-gray-600"}>📊 Quick Stats:</span>
+                            <div className="flex space-x-4">
+                              <span className={isDarkMode ? "text-blue-400" : "text-blue-600"}>
+                                {events.filter((e) => new Date(e.date) > new Date() && e.type === "meeting").length}{" "}
+                                Meetings
+                              </span>
+                              <span className={isDarkMode ? "text-purple-400" : "text-purple-600"}>
+                                {events.filter((e) => new Date(e.date) > new Date() && e.type === "event").length}{" "}
+                                Events
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
-              <button className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200">
-                View All →
-              </button>
-            </div>
-            <div className="space-y-4">
-              {dashboardData.recentActivities.map((activity) => (
-                <div
-                  key={activity.id}
-                  className={`flex items-center space-x-4 p-3 rounded-lg transition-all duration-200 cursor-pointer transform hover:scale-[1.02] ${
-                    activity.type === "New Hire"
-                        ? "bg-green-100 text-green-800 hover:bg-green-300"
-                        : activity.type === "Review"
-                          ? "bg-blue-100 text-blue-800 hover:bg-blue-300"
-                          : activity.type === "Event"
-                            ? "bg-purple-100 text-purple-800 hover:bg-purple-300"
-                            : "bg-yellow-100 text-yellow-800 hover:bg-yellow-300"
-                  }`}
-                  onClick={() => handleChartClick(activity, "activity")}
-                >
-                  <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center hover:rotate-6 transition-transform duration-200">
-                    {activity.type === "Event" ? (
-                      <FaCalendarAlt className="text-white text-sm" />
-                    ) : (
-                      <span className="text-white text-sm font-medium">
-                        {activity.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-sm transition-colors duration-300">
-                      <strong>{activity.name}</strong> {activity.action}
-                    </div>
-                    <div className="text-xs transition-colors duration-300">
-                      {activity.time}
-                    </div>
-                  </div>
-                  <div
-                    className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 hover:scale-110 ${
-                      activity.type === "New Hire"
-                        ? "bg-green-200 text-green-800 hover:bg-green-200"
-                        : activity.type === "Review"
-                          ? "bg-blue-200 text-blue-800 hover:bg-blue-200"
-                          : activity.type === "Event"
-                            ? "bg-purple-200 text-purple-800 hover:bg-purple-200"
-                            : "bg-yellow-200 text-yellow-800 hover:bg-yellow-200"
-                    }`}
-                  >
-                    {activity.type}
+
+              {/* Updates Section */}
+              <div className="border-t pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3
+                      className={`text-lg font-semibold transition-colors duration-300 ${isDarkMode ? "text-white" : "text-gray-800"
+                        }`}
+                    >
+                      Updates
+                    </h3>
+                    <p
+                      className={`text-sm transition-colors duration-300 ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                        }`}
+                    >
+                      Employee recognition and leave status
+                    </p>
                   </div>
                 </div>
-              ))}
+                <div className="space-y-3">
+                  {/* Employee Recognition */}
+                  <div
+                    className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${isDarkMode ? "bg-gray-700" : "bg-green-50"
+                      }`}
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
+                      <FaAward className="text-white text-sm" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className={`font-medium text-sm ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+                        Employee of the Month
+                      </h4>
+                      <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        Sarah Johnson - Outstanding Performance
+                      </p>
+                    </div>
+                    <div className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">Recognition</div>
+                  </div>
+
+                  {/* Team Achievement */}
+                  <div
+                    className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${isDarkMode ? "bg-gray-700" : "bg-blue-50"
+                      }`}
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full flex items-center justify-center">
+                      <FaUsers className="text-white text-sm" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className={`font-medium text-sm ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+                        Team Achievement
+                      </h4>
+                      <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        Marketing Team - Q4 Goals Exceeded
+                      </p>
+                    </div>
+                    <div className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">Achievement</div>
+                  </div>
+
+                  {/* Employees on Leave */}
+                  <div
+                    className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${isDarkMode ? "bg-gray-700" : "bg-orange-50"
+                      }`}
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-red-500 rounded-full flex items-center justify-center">
+                      <FaCalendarTimes className="text-white text-sm" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className={`font-medium text-sm ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+                        Current Leave Status
+                      </h4>
+                      <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        3 employees on leave this week
+                      </p>
+                    </div>
+                    <div className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-800">Leave</div>
+                  </div>
+
+                  {/* New Hire Welcome */}
+                  <div
+                    className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${isDarkMode ? "bg-gray-700" : "bg-purple-50"
+                      }`}
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full flex items-center justify-center">
+                      <FaUserPlus className="text-white text-sm" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className={`font-medium text-sm ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+                        Welcome New Hire
+                      </h4>
+                      <p className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                        Alex Chen joined Development Team
+                      </p>
+                    </div>
+                    <div className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-800">New Hire</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Department Overview with Attendance Trend */}
           <div className="space-y-4 sm:space-y-6">
             <div
-              className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              }`}
+              className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${isDarkMode ? "bg-gray-800" : "bg-white"
+                }`}
             >
               <div className="flex items-center justify-between mb-4">
                 <h3
-                  className={`text-lg font-semibold transition-colors duration-300 ${
-                    isDarkMode ? "text-white" : "text-gray-800"
-                  }`}
+                  className={`text-lg font-semibold transition-colors duration-300 ${isDarkMode ? "text-white" : "text-gray-800"
+                    }`}
                 >
                   Department Overview
                 </h3>
                 <select
                   value={selectedDepartment}
                   onChange={(e) => setSelectedDepartment(e.target.value)}
-                  className={`px-3 py-1 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-300 ${
-                    isDarkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"
-                  }`}
+                  className={`px-3 py-1 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-300 ${isDarkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-900"
+                    }`}
                 >
                   <option value="all">All Departments</option>
                   {staticData.departments.map((dept) => (
@@ -758,9 +946,8 @@ const Dashboard = () => {
                 </select>
               </div>
               <p
-                className={`text-sm sm:text-base mb-4 transition-colors duration-300 ${
-                  isDarkMode ? "text-gray-300" : "text-gray-600"
-                }`}
+                className={`text-sm sm:text-base mb-4 transition-colors duration-300 ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
               >
                 Employee distribution by department
               </p>
@@ -768,9 +955,8 @@ const Dashboard = () => {
                 {dashboardData.departments.map((dept) => (
                   <div
                     key={dept.name}
-                    className={`flex items-center justify-between cursor-pointer p-2 sm:p-3 rounded-lg transition-all duration-200 ${
-                      isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-50"
-                    }`}
+                    className={`flex items-center justify-between cursor-pointer p-2 sm:p-3 rounded-lg transition-all duration-200 ${isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-50"
+                      }`}
                     onClick={() => handleChartClick(dept, "department")}
                   >
                     <div className="flex items-center space-x-3">
@@ -779,9 +965,8 @@ const Dashboard = () => {
                         style={{ backgroundColor: dept.color }}
                       ></div>
                       <span
-                        className={`text-sm font-medium transition-colors duration-300 ${
-                          isDarkMode ? "text-gray-200" : "text-gray-700"
-                        }`}
+                        className={`text-sm font-medium transition-colors duration-300 ${isDarkMode ? "text-gray-200" : "text-gray-700"
+                          }`}
                       >
                         {dept.name}
                       </span>
@@ -799,9 +984,8 @@ const Dashboard = () => {
                         ></div>
                       </div>
                       <span
-                        className={`text-sm w-20 text-right transition-colors duration-300 ${
-                          isDarkMode ? "text-gray-300" : "text-gray-600"
-                        }`}
+                        className={`text-sm w-20 text-right transition-colors duration-300 ${isDarkMode ? "text-gray-300" : "text-gray-600"
+                          }`}
                       >
                         {dept.count} employees
                       </span>
@@ -812,15 +996,13 @@ const Dashboard = () => {
             </div>
 
             <div
-              className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              }`}
+              className={`rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${isDarkMode ? "bg-gray-800" : "bg-white"
+                }`}
             >
               <div className="flex items-center justify-between mb-4">
                 <h3
-                  className={`text-lg font-semibold transition-colors duration-300 ${
-                    isDarkMode ? "text-white" : "text-gray-800"
-                  }`}
+                  className={`text-lg font-semibold transition-colors duration-300 ${isDarkMode ? "text-white" : "text-gray-800"
+                    }`}
                 >
                   Attendance Trend
                 </h3>
@@ -907,8 +1089,8 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <div className={`text-xs px-2 py-1 rounded-full ${
-                      event.mode_of_event === "online" 
-                        ? "bg-blue-100 text-blue-800" 
+                      event.mode_of_event === "online"
+                        ? "bg-blue-100 text-blue-800"
                         : event.mode_of_event === "offline"
                         ? "bg-green-100 text-green-800"
                         : "bg-purple-100 text-purple-800"
@@ -924,110 +1106,211 @@ const Dashboard = () => {
       </main>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div
-            className={`rounded-xl p-4 sm:p-6 max-w-4xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-y-auto transform transition-all duration-300 scale-100 mx-2 sm:mx-0 ${
-              isDarkMode ? "bg-gray-800" : "bg-white"
-            }`}
+            style={{
+              position: 'relative',
+              width: '100%',
+              maxWidth: '48rem',
+              height: '80vh',
+              borderRadius: '1rem',
+              boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25)',
+              border: '1px solid #e5e7eb',
+              backgroundColor: '#ffffff',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }} 
           >
-            <div className="flex items-center justify-between mb-6">
-              <h3
-                className={`text-xl sm:text-2xl font-semibold transition-colors duration-300 ${
-                  isDarkMode ? "text-white" : "text-gray-800"
-                }`}
-              >
-                {modalData?.type === "employees" && "Employee Details"}
-                {modalData?.type === "active" && "Active Employees Today"}
-                {modalData?.type === "events" && "Upcoming Events Details"}
-                {modalData?.type === "eventDetail" && "Event Details"}
-                {modalData?.type === "leave" && "Employees on Leave"}
-                {modalData?.type === "performance" && "Performance Metrics"}
-                {modalData?.type === "employeeTypes" && "Employee Type Distribution"}
-                {modalData?.type === "hiringTrends" && "Hiring Trends Analysis"}
-                {modalData?.type === "attendance" && "Attendance Analysis"}
-                {modalData?.type === "department" && `${modalData?.data?.name} Department`}
-                {modalData?.type === "activity" && "Activity Details"}
-              </h3>
+            <div
+              className={`sticky top-0 z-20 px-6 py-4 border-b ${isDarkMode ? "bg-gray-800/95 border-gray-600" : "bg-white/95 border-gray-200"
+                } backdrop-blur-sm flex items-center justify-between shadow-sm`}
+            >
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">📅</span>
+                <h3 className={`text-xl font-semibold ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+                  {modalData?.type === "events" ? "Upcoming Events" : "Details"}
+                </h3>
+              </div>
               <button
                 onClick={() => setShowModal(false)}
-                className={`text-2xl transition-colors duration-200 ${
-                  isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-800"
-                }`}
+                className={`p-2 rounded-full transition-all duration-200 hover:scale-110 shadow-lg border ${isDarkMode
+                    ? "bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white border-gray-600"
+                    : "bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-800 border-gray-200"
+                  }`}
               >
-                ×
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
-            
-            {modalData?.type === "events" && (
-              <div className="space-y-4">
-                <p className={`text-lg ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
-                  Total upcoming events: <strong>{modalData.data.value}</strong>
-                </p>
-                <div className="grid gap-4">
-                  {events.filter(event => new Date(event.date) > new Date()).map(event => (
-                    <div key={event.id} className={`p-4 rounded-lg ${isDarkMode ? "bg-gray-700" : "bg-gray-50"}`}>
-                      <h4 className={`font-semibold ${isDarkMode ? "text-white" : "text-gray-800"}`}>{event.title}</h4>
-                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                        {new Date(event.date).toLocaleDateString()} • {event.organizer || "No organizer"}
-                      </p>
-                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                        Mode: {event.mode_of_event} • Duration: {event.duration} mins
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {modalData?.type === "eventDetail" && (
-              <div className="space-y-4">
-                <div className={`p-4 rounded-lg ${isDarkMode ? "bg-gray-700" : "bg-gray-50"}`}>
-                  <h4 className={`text-xl font-semibold mb-3 ${isDarkMode ? "text-white" : "text-gray-800"}`}>
-                    {modalData.data.title}
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                        <FaCalendarAlt className="inline mr-2" />
-                        Date: {new Date(modalData.data.date).toLocaleDateString()}
-                      </p>
-                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                        <FaClock className="inline mr-2" />
-                        Duration: {modalData.data.duration} minutes
-                      </p>
-                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                        Organizer: {modalData.data.organizer || "No organizer"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                        Mode: {modalData.data.mode_of_event}
-                      </p>
-                      <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                        Timezone: {modalData.data.timezone}
-                      </p>
-                      {modalData.data.location && (
-                        <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-                          Location: {modalData.data.location}
-                        </p>
-                      )}
-                    </div>
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar min-h-0">
+              {modalData?.type === "events" && (
+                <div className="space-y-4">
+                  <div className={`p-4 rounded-xl ${isDarkMode ? "bg-gray-700/50" : "bg-blue-50"}`}>
+                    <p className={`text-lg font-medium ${isDarkMode ? "text-blue-300" : "text-blue-700"}`}>
+                      Total upcoming events: {Array.isArray(modalData.data) ? modalData.data.length : 0}
+                    </p>
                   </div>
-                  {modalData.data.meeting_link && (
-                    <div className="mt-4">
-                      <a 
-                        href={modalData.data.meeting_link} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        Join Meeting →
-                      </a>
-                    </div>
-                  )}
+
+                  <div className="grid gap-4">
+                    {Array.isArray(modalData.data) && modalData.data.length > 0 ? (
+                      modalData.data.map((event, index) => (
+                        <div
+                          key={index}
+                          className={`p-5 rounded-xl border transition-all duration-200 hover:shadow-lg ${isDarkMode
+                              ? "bg-gray-700 border-gray-600 hover:border-gray-500"
+                              : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-md"
+                            }`}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <h4 className={`text-xl font-semibold ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+                              {event.title || "Untitled Event"}
+                            </h4>
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-medium ${isDarkMode ? "bg-blue-900 text-blue-200" : "bg-blue-100 text-blue-800"
+                                }`}
+                            >
+                              {event.mode_of_event || "TBD"}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            <div className="space-y-2">
+                              <p className={`flex items-center ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                <FaCalendarAlt className="mr-2 text-blue-500" />
+                                {event.date
+                                  ? new Date(event.date).toLocaleDateString("en-US", {
+                                    weekday: "long",
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  })
+                                  : "Date TBD"}
+                              </p>
+                              <p className={`flex items-center ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                <FaUser className="mr-2 text-green-500" />
+                                {event.instructor || "Instructor TBD"}
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <p className={`flex items-center ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                <FaClock className="mr-2 text-orange-500" />
+                                Duration: {event.duration || "TBD"}
+                              </p>
+                              {event.location && (
+                                <p className={`flex items-center ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                  <FaMapMarkerAlt className="mr-2 text-red-500" />
+                                  {event.location}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {event.description && (
+                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                              <p className={`text-sm ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                                {event.description}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className={`p-8 text-center rounded-xl ${isDarkMode ? "bg-gray-700/50" : "bg-gray-50"}`}>
+                        <FaCalendarAlt
+                          className={`mx-auto mb-3 text-4xl ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}
+                        />
+                        <p className={`text-lg font-medium ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+                          No events data available
+                        </p>
+                        <p className={`text-sm mt-2 ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>
+                          Events will appear here when they are scheduled.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {modalData?.type === "eventDetail" && (
+                <div className="space-y-6">
+                  <div
+                    className={`p-6 rounded-xl border ${isDarkMode
+                        ? "bg-gray-700 border-gray-600"
+                        : "bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200"
+                      }`}
+                  >
+                    <h4 className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-white" : "text-gray-800"}`}>
+                      {modalData.data.title}
+                    </h4>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className={`p-4 rounded-lg ${isDarkMode ? "bg-gray-600" : "bg-white/70"}`}>
+                          <h5 className={`font-semibold mb-2 ${isDarkMode ? "text-blue-300" : "text-blue-700"}`}>
+                            📅 Event Details
+                          </h5>
+                          <p className={`flex items-center mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                            <FaCalendarAlt className="mr-3 text-blue-500" />
+                            {new Date(modalData.data.date).toLocaleDateString("en-US", {
+                              weekday: "long",
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </p>
+                          <p className={`flex items-center mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                            <FaClock className="mr-3 text-green-500" />
+                            Duration: {modalData.data.duration} minutes
+                          </p>
+                          <p className={`flex items-center ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                            <FaUser className="mr-3 text-purple-500" />
+                            Organizer: {modalData.data.organizer || "No organizer"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className={`p-4 rounded-lg ${isDarkMode ? "bg-gray-600" : "bg-white/70"}`}>
+                          <h5 className={`font-semibold mb-2 ${isDarkMode ? "text-green-300" : "text-green-700"}`}>
+                            🌐 Connection Details
+                          </h5>
+                          <p className={`flex items-center mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                            <FaGlobe className="mr-3 text-orange-500" />
+                            Mode: {modalData.data.mode_of_event}
+                          </p>
+                          <p className={`flex items-center mb-2 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                            <FaClock className="mr-3 text-blue-500" />
+                            Timezone: {modalData.data.timezone}
+                          </p>
+                          {modalData.data.location && (
+                            <p className={`flex items-center ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
+                              <FaMapMarkerAlt className="mr-3 text-red-500" />
+                              Location: {modalData.data.location}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {modalData.data.meeting_link && (
+                      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                        <a
+                          href={modalData.data.meeting_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
+                        >
+                          <FaExternalLinkAlt className="mr-2" />
+                          Join Meeting Now
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {modalData?.type === "employees" && (
                 <div className="space-y-4">
@@ -1266,47 +1549,47 @@ const Dashboard = () => {
               {(modalData?.type === "hiringTrends" ||
                 modalData?.type === "attendance" ||
                 modalData?.type === "performance") && (
-                <div className="space-y-4">
-                  <div className="bg-gradient-to-r from-indigo-50 to-indigo-100 p-4 rounded-lg">
-                    <h4 className="font-semibold text-indigo-800 mb-2">Analytics Summary</h4>
-                    <p className="text-indigo-700">
-                      {modalData?.type === "hiringTrends" &&
-                        "Monthly hiring shows positive growth with 67 new hires in June, exceeding targets by 15%."}
-                      {modalData?.type === "attendance" &&
-                        "Weekly attendance maintains excellent levels above 95%, with Week 4 showing peak performance at 96.1%."}
-                      {modalData?.type === "performance" &&
-                        "Department performance metrics show HR leading at 9.1/10, with all departments exceeding 8.5 benchmark."}
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h5 className="font-medium mb-2">Key Insights</h5>
-                      <ul className="text-sm space-y-1">
-                        <li>• Consistent upward trend</li>
-                        <li>• Above industry average</li>
-                        <li>• Strong team performance</li>
-                      </ul>
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-r from-indigo-50 to-indigo-100 p-4 rounded-lg">
+                      <h4 className="font-semibold text-indigo-800 mb-2">Analytics Summary</h4>
+                      <p className="text-indigo-700">
+                        {modalData?.type === "hiringTrends" &&
+                          "Monthly hiring shows positive growth with 67 new hires in June, exceeding targets by 15%."}
+                        {modalData?.type === "attendance" &&
+                          "Weekly attendance maintains excellent levels above 95%, with Week 4 showing peak performance at 96.1%."}
+                        {modalData?.type === "performance" &&
+                          "Department performance metrics show HR leading at 9.1/10, with all departments exceeding 8.5 benchmark."}
+                      </p>
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h5 className="font-medium mb-2">Recommendations</h5>
-                      <ul className="text-sm space-y-1">
-                        <li>• Continue current strategies</li>
-                        <li>• Monitor seasonal patterns</li>
-                        <li>• Expand successful programs</li>
-                      </ul>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h5 className="font-medium mb-2">Key Insights</h5>
+                        <ul className="text-sm space-y-1">
+                          <li>• Consistent upward trend</li>
+                          <li>• Above industry average</li>
+                          <li>• Strong team performance</li>
+                        </ul>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h5 className="font-medium mb-2">Recommendations</h5>
+                        <ul className="text-sm space-y-1">
+                          <li>• Continue current strategies</li>
+                          <li>• Monitor seasonal patterns</li>
+                          <li>• Expand successful programs</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
+          </div>
         </div>
-      )
-}
+      )}
 
-{
-  showProfileDropdown && <div className="fixed inset-0 z-40" onClick={() => setShowProfileDropdown(false)} />
-}
-</div>
+
+      {showProfileDropdown && <div className="fixed inset-0 z-40" onClick={() => setShowProfileDropdown(false)} />}
+    </div>
+
   )
 }
 
